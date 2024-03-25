@@ -39,14 +39,14 @@ watch(route, async () => {
 })
 
 function handleMenuSelect(key, item) {
-  if (isExternal(item.originPath)) {
+  if (isExternal(item.path)) {
     $dialog.confirm({
       type: 'info',
       title: `请选择打开方式`,
       positiveText: '外链打开',
       negativeText: '在本站内嵌打开',
       confirm() {
-        window.open(item.originPath)
+        window.open(item.path)
       },
       cancel: () => {
         router.push(item.path)

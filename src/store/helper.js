@@ -25,5 +25,13 @@ export async function getPermissions() {
   } catch (error) {
     console.error(error)
   }
+
+  // asyncPermissions.map(item => {
+  //   item.name = item.title || item.description
+  //   item.code = item.permissionCode
+  //   item.type= 'MENU'
+  //   item.enable = true
+  //   item.show = true
+  // })
   return basePermissions.concat(asyncPermissions)
 }

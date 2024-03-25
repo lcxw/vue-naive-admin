@@ -38,7 +38,7 @@ export async function initUserAndPermissions() {
 
   if (!authStore.accessToken) {
     const route = unref(router.currentRoute)
-    if (route.path !== '/login') {
+    if (!route.path.startsWith('/login')) {
       router.replace({
         path: '/login',
         query: route.query,
@@ -49,6 +49,9 @@ export async function initUserAndPermissions() {
   const [user, permissions] = await Promise.all([getUserInfo(), getPermissions()])
   userStore.setUser(user)
   permissionStore.setPermissions(permissions)
+  console.log(permissionStore.permissions)
+  console.log(permissionStore.menus)
+  console.log(permissionStore.accessRoutes)
   const routeComponents = import.meta.glob('@/views/**/*.vue')
   permissionStore.accessRoutes.forEach((route) => {
     route.component = routeComponents[route.component] || undefined
