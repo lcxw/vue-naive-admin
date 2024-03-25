@@ -31,6 +31,7 @@ export function setupInterceptors(axiosInstance) {
   }
 
   const SUCCESS_CODES = [0, 200]
+
   function resResolve(response) {
     const { data, status, config, statusText, headers } = response
     if (headers['content-type']?.includes('json')) {
@@ -40,18 +41,23 @@ export function setupInterceptors(axiosInstance) {
       const code = data?.code ?? status
 
       // 根据code处理对应的操作，并返回处理后的message
-      const message = resolveResError(code, data?.message ?? statusText)
-
+      const message = resolveResError(code, data?.msg ?? statusText)
       //需要错误提醒
       !config?.noNeedTip && message && window.$message?.error(message)
-      return Promise.reject({ code, message, error: data ?? response })
+      if (!(code === 200)) {
+        console.warn(`error while getting result from ${axiosInstance.url} with code: ${code} ,message: ${message}`)
+        return Promise.reject({ code, message, error: data ?? response })
+      } else {
+        console.warn(`error while getting result with json ${axiosInstance.url} with code: ${code} ,message: ${JSON.stringify(message)},data: ${JSON.stringify(data)}`)
+        return Promise.resolve(data)
+      }
     }
     return Promise.resolve(data ?? response)
   }
 
-  async function resReject(error) {
+  function resReject(error) {
     if (!error || !error.response) {
-      const code = error?.code
+      const code = error?.code || error.response.status
       /** 根据code处理对应的操作，并返回处理后的message */
       const message = resolveResError(code, error.message)
       window.$message?.error(message)

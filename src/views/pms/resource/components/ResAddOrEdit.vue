@@ -40,7 +40,6 @@
           <n-input v-model:value="modalForm.code" />
         </n-form-item-gi>
         <n-form-item-gi
-          v-if="modalForm.type === 'MENU'"
           :span="12"
           path="path"
           :rule="{
@@ -60,7 +59,7 @@
           </template>
           <n-input v-model:value="modalForm.path" />
         </n-form-item-gi>
-        <n-form-item-gi v-if="modalForm.type === 'MENU'" :span="12" path="icon">
+        <n-form-item-gi :span="12" path="icon">
           <template #label>
             <QuestionLabel
               label="菜单图标"
@@ -69,7 +68,7 @@
           </template>
           <n-select v-model:value="modalForm.icon" :options="iconOptions" clearable filterable />
         </n-form-item-gi>
-        <n-form-item-gi v-if="modalForm.type === 'MENU'" :span="12" path="layout">
+        <n-form-item-gi :span="12" path="layout">
           <template #label>
             <QuestionLabel
               label="layout"
@@ -78,7 +77,7 @@
           </template>
           <n-select v-model:value="modalForm.layout" :options="layoutOptions" clearable />
         </n-form-item-gi>
-        <n-form-item-gi v-if="modalForm.type === 'MENU'" :span="24" path="component">
+        <n-form-item-gi :span="24" path="component">
           <template #label>
             <QuestionLabel
               label="组件路径"
@@ -94,7 +93,7 @@
           />
         </n-form-item-gi>
 
-        <n-form-item-gi v-if="modalForm.type === 'MENU'" :span="12" path="show">
+        <n-form-item-gi :span="12" path="show">
           <template #label>
             <QuestionLabel label="显示状态" content="控制是否在菜单栏显示，不影响路由注册" />
           </template>
@@ -115,7 +114,7 @@
             <template #unchecked>禁用</template>
           </n-switch>
         </n-form-item-gi>
-        <n-form-item-gi v-if="modalForm.type === 'MENU'" :span="12" path="keepAlive">
+        <n-form-item-gi :span="12" path="enable">
           <template #label>
             <QuestionLabel
               label="KeepAlive"
@@ -128,7 +127,6 @@
           </n-switch>
         </n-form-item-gi>
         <n-form-item-gi
-          v-if="modalForm.type === 'MENU'"
           :span="12"
           label="排序"
           path="order"
@@ -189,12 +187,10 @@ const [modalFormRef, modalForm, validation] = useForm()
 const [modalRef, okLoading] = useModal()
 
 const modalAction = ref('')
-const parentIdDisabled = ref(false)
 function handleOpen(options = {}) {
   const { action, row = {}, ...rest } = options
   modalAction.value = action
-  modalForm.value = { ...defaultForm, ...row }
-  parentIdDisabled.value = !!row.parentId && row.type === 'BUTTON'
+  modalForm.value = { ...row }
   modalRef.value.open({ ...rest, onOk: onSave })
 }
 
@@ -202,17 +198,15 @@ async function onSave() {
   await validation()
   okLoading.value = true
   try {
-    let newFormData
     if (!modalForm.value.parentId) modalForm.value.parentId = null
     if (modalAction.value === 'add') {
-      const res = await api.addPermission(modalForm.value)
-      newFormData = res.data
+      await api.addPermission(modalForm.value)
     } else if (modalAction.value === 'edit') {
       await api.savePermission(modalForm.value.id, modalForm.value)
     }
     okLoading.value = false
     $message.success('保存成功')
-    emit('refresh', modalAction.value === 'add' ? newFormData : modalForm.value)
+    emit('refresh', modalForm.value)
   } catch (error) {
     console.error(error)
     okLoading.value = false

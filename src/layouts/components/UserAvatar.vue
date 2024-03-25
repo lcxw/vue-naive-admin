@@ -23,7 +23,9 @@
 <script setup>
 import { useUserStore, useAuthStore, usePermissionStore } from '@/store'
 import { RoleSelect } from '@/layouts/components'
+import { initUserAndPermissions } from '@/router'
 import api from '@/api'
+import { AxiosHeaders as Buffer } from 'axios'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -35,22 +37,28 @@ const options = reactive([
     label: '个人资料',
     key: 'profile',
     icon: () => h('i', { class: 'i-material-symbols:person-outline text-14' }),
-    show: computed(() => permissionStore.accessRoutes?.some((item) => item.path === '/profile')),
+    show: computed(() => permissionStore.accessRoutes?.some((item) => item.path === '/profile'))
   },
   {
     label: '切换角色',
     key: 'toggleRole',
     icon: () => h('i', { class: 'i-basil:exchange-solid text-14' }),
-    show: computed(() => userStore.roles.length > 1),
+    show: computed(() => userStore.roles.length > 1)
   },
   {
     label: '退出登录',
     key: 'logout',
-    icon: () => h('i', { class: 'i-mdi:exit-to-app text-14' }),
+    icon: () => h('i', { class: 'i-mdi:exit-to-app text-14' })
   },
+  {
+    label: '刷新状态',
+    key: 'refresh',
+    icon: () => h('i', { class: 'i-mdi:exit-to-app text-14' })
+  }
 ])
 
 const roleSelectRef = ref(null)
+
 function handleSelect(key) {
   switch (key) {
     case 'profile':
@@ -59,8 +67,10 @@ function handleSelect(key) {
     case 'toggleRole':
       roleSelectRef.value?.open({
         onOk() {
-          location.reload()
-        },
+          initUserAndPermissions().then(() => {
+            router.replace('/')
+          })
+        }
       })
       break
     case 'logout':
@@ -76,8 +86,44 @@ function handleSelect(key) {
           }
           authStore.logout()
           $message.success('已退出登录')
-        },
+        }
       })
+      break
+    case 'refresh':
+      let refreshToken = authStore.refreshToken
+      if (refreshToken) {
+        let formData = new FormData()
+        // formData.append('client_id', 'ff9685b0-ac9b-4188-835d-1b8ced815acb')
+        formData.append('grant_type', 'refresh_token')
+        // formData.append('client_secret', 'vueClient')
+        formData.append('refresh_token', refreshToken)
+        const token = `BASIC vueClient:vueClient`
+        const encodedToken = Buffer.from(token).toString('base64')
+        btoa("xxxx" + ":" + "xxxx");
+        let refreshTokenResponse = api.refreshToken(formData, {
+          headers: {
+            'Authorization': encodedToken
+          }
+          // auth: {
+          //   username: 'ff9685b0-ac9b-4188-835d-1b8ced815acb',
+          //   password: 'vueClient'
+          // }
+        }).then(res => {
+          console.log(res)
+          authStore.setToken({
+            accessToken: res.access_token,
+            refreshToken: res.refresh_token,
+            idToken: res.id_token
+          })
+        })
+          .catch(error => {
+            console.error(error)
+            authStore.setToken({ accessToken: null, refreshToken: null, idToken: null })
+          })
+      }else {
+        console.debug("no refresh token found")
+        authStore.$reset()
+      }
       break
   }
 }

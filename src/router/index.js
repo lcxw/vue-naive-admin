@@ -8,6 +8,8 @@
 
 import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
 import { setupRouterGuards } from './guards'
+import { useAuthStore, usePermissionStore, useUserStore } from '@/store'
+import { getPermissions, getUserInfo } from '@/store/helper'
 import { basicRoutes } from './basic-routes'
 
 export const router = createRouter({
@@ -20,6 +22,39 @@ export const router = createRouter({
 })
 
 export async function setupRouter(app) {
-  app.use(router)
+  try {
+    await initUserAndPermissions()
+  } catch (error) {
+    console.error('🚀 初始化失败', error)
+  }
   setupRouterGuards(router)
+  app.use(router)
+}
+
+export async function initUserAndPermissions() {
+  const permissionStore = usePermissionStore()
+  const userStore = useUserStore()
+  const authStore = useAuthStore()
+
+  if (!authStore.accessToken) {
+    const route = unref(router.currentRoute)
+    if (!route.path.startsWith('/login')) {
+      router.replace({
+        path: '/login',
+        query: route.query,
+      })
+    }
+    return
+  }
+  const [user, permissions] = await Promise.all([getUserInfo(), getPermissions()])
+  userStore.setUser(user)
+  permissionStore.setPermissions(permissions)
+  console.log(permissionStore.permissions)
+  console.log(permissionStore.menus)
+  console.log(permissionStore.accessRoutes)
+  const routeComponents = import.meta.glob('@/views/**/*.vue')
+  permissionStore.accessRoutes.forEach((route) => {
+    route.component = routeComponents[route.component] || undefined
+    !router.hasRoute(route.name) && router.addRoute(route)
+  })
 }
