@@ -10,12 +10,12 @@ import { useAuthStore, usePermissionStore, useUserStore } from '@/store'
 import api from '@/api'
 import { getPermissions, getUserInfo } from '@/store/helper'
 
-const WHITE_LIST = ['/login', '/404']
+const WHITE_LIST = ['/login', '/404', '/login/oauth2/callback/', '/login/oauth2/callback', '/login/oauth2/callback/vueClient']
+
 export function createPermissionGuard(router) {
   router.beforeEach(async (to) => {
     const authStore = useAuthStore()
     const token = authStore.accessToken
-
     /** 没有token */
     if (!token) {
       if (WHITE_LIST.includes(to.path)) return true
@@ -26,21 +26,12 @@ export function createPermissionGuard(router) {
     if (to.path === '/login') return { path: '/' }
     if (WHITE_LIST.includes(to.path)) return true
 
-    const userStore = useUserStore()
-    const permissionStore = usePermissionStore()
-    if (!userStore.userInfo) {
-      const [user, permissions] = await Promise.all([getUserInfo(), getPermissions()])
-      userStore.setUser(user)
-      permissionStore.setPermissions(permissions)
-      const routeComponents = import.meta.glob('@/views/**/*.vue')
-      permissionStore.accessRoutes.forEach((route) => {
-        route.component = routeComponents[route.component] || undefined
-        !router.hasRoute(route.name) && router.addRoute(route)
-      })
-      return { ...to, replace: true }
-    }
-
     const routes = router.getRoutes()
+      if(to){
+          console.log(`${to}不为空,访问地址:${to.name},访问地址:${to.fullPath}`,to.name)
+      }else{
+          console.log("to为空")
+      }
     if (routes.find((route) => route.name === to.name)) return true
 
     // 判断是无权限还是404

@@ -76,7 +76,7 @@
 
         <div class="mt-20 flex items-center">
           <n-button
-            class="h-40 flex-1 rounded-5 text-16"
+            class="h-40 flex-1 rounded-5 text-12"
             type="primary"
             ghost
             @click="quickLogin()"
@@ -85,12 +85,21 @@
           </n-button>
 
           <n-button
-            class="ml-32 h-40 flex-1 rounded-5 text-16"
+            class="ml-32 h-40 flex-1 rounded-5 text-12"
             type="primary"
             :loading="loading"
             @click="handleLogin()"
           >
             登录
+          </n-button>
+
+          <n-button
+            class="ml-12 h-40 flex-1 rounded-5 text-12"
+            type="primary"
+            :loading="loading"
+            @click="handleOAuth2Login()"
+          >
+            OAuth2快捷登录
           </n-button>
         </div>
       </div>
@@ -105,6 +114,7 @@ import { throttle, lStorage } from '@/utils'
 import { useStorage } from '@vueuse/core'
 import api from './api'
 import { useAuthStore } from '@/store'
+import { initUserAndPermissions } from '@/router'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -136,6 +146,18 @@ function quickLogin() {
 
 const isRemember = useStorage('isRemember', true)
 const loading = ref(false)
+
+async function handleOAuth2Login() {
+  const url = 'http://oidcs.cated.local:20005/oauth2/authorize?client_id=vueClient&redirect_uri=http://localhost:3200/login/oauth2/callback/vueClient&grant_type=authorize_code&response_type=code&scope=openid%20profile%20email&state=1234567890'
+  // open oauth2 login url
+  // var authWin = window.open(
+  //   url,
+  //   '_blank',
+  //   'width=600,height=400,menubar=no,toolbar=no,location=no'
+  // )
+  location.href = url
+}
+
 async function handleLogin(isQuick) {
   const { username, password, captcha } = loginInfo.value
   if (!username || !password) return $message.warning('请输入用户名和密码')
@@ -166,6 +188,7 @@ async function onLoginSuccess(data = {}) {
   authStore.setToken(data)
   $message.loading('登录中...', { key: 'login' })
   try {
+    await initUserAndPermissions()
     $message.success('登录成功', { key: 'login' })
     if (route.query.redirect) {
       const path = route.query.redirect

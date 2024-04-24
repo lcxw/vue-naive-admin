@@ -194,6 +194,7 @@ function handleOpen(options = {}) {
   const { action, row = {}, ...rest } = options
   modalAction.value = action
   modalForm.value = { ...defaultForm, ...row }
+  debugger
   parentIdDisabled.value = !!row.parentId && row.type === 'BUTTON'
   modalRef.value.open({ ...rest, onOk: onSave })
 }
