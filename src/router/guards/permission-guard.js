@@ -10,7 +10,14 @@ import { useAuthStore, usePermissionStore, useUserStore } from '@/store'
 import api from '@/api'
 import { getPermissions, getUserInfo } from '@/store/helper'
 
-const WHITE_LIST = ['/login', '/404']
+const WHITE_LIST = [
+  '/login',
+  '/404',
+  '/login/oauth2/callback/',
+  '/login/oauth2/callback',
+  '/login/oauth2/callback/vueClient',
+]
+
 export function createPermissionGuard(router) {
   router.beforeEach(async (to) => {
     const authStore = useAuthStore()
@@ -41,6 +48,11 @@ export function createPermissionGuard(router) {
     }
 
     const routes = router.getRoutes()
+    if (to) {
+      console.log(`${to}不为空,访问地址:${to.name},访问地址:${to.fullPath}`, to.name)
+    } else {
+      console.log('to为空')
+    }
     if (routes.find((route) => route.name === to.name)) return true
 
     // 判断是无权限还是404
