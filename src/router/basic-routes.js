@@ -1,5 +1,14 @@
 export const basicRoutes = [
   {
+    name: 'oauth2-callback',
+    path: '/login/oauth2/callback/:clientId',
+    component: () => import('@/views/login/oauth2-callback.vue'),
+    meta: {
+      title: 'oauth2授权码回调',
+      layout: 'empty',
+    },
+  },
+  {
     name: 'Login',
     path: '/login',
     component: () => import('@/views/login/index.vue'),

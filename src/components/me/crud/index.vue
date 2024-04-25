@@ -103,26 +103,35 @@ async function handleQuery() {
     let paginationParams = {}
     // 如果非分页模式或者使用前端分页,则无需传分页参数
     if (props.isPagination && props.remote) {
-      paginationParams = { pageNo: pagination.page, pageSize: pagination.pageSize }
+      paginationParams = {
+        pageNo: pagination.page,
+        pageSize: pagination.pageSize,
+        page: pagination.page,
+        limit: pagination.pageSize,
+      }
     }
     const { data } = await props.getData({
       ...props.queryItems,
       ...paginationParams,
     })
-    tableData.value = data?.pageData || data
-    pagination.itemCount = data.total ?? data.length
+    tableData.value = data?.pageData || data?.records
+    pagination.itemCount = data.total ?? data.length ?? data.totalRow
   } catch (error) {
+    console.error(error)
     tableData.value = []
     pagination.itemCount = 0
   } finally {
     emit('onDataChange', tableData.value)
+    console.log(tableData.value)
     loading.value = false
   }
 }
+
 function handleSearch() {
   pagination.page = 1
   handleQuery()
 }
+
 async function handleReset() {
   const queryItems = { ...props.queryItems }
   for (const key in queryItems) {
@@ -133,17 +142,20 @@ async function handleReset() {
   pagination.page = 1
   handleQuery()
 }
+
 function onPageChange(currentPage) {
   pagination.page = currentPage
   if (props.remote) {
     handleQuery()
   }
 }
+
 function onChecked(rowKeys) {
   if (props.columns.some((item) => item.type === 'selection')) {
     emit('onChecked', rowKeys)
   }
 }
+
 function handleExport(columns = props.columns, data = tableData.value) {
   if (!data?.length) return $message.warning('没有数据')
   const columnsData = columns.filter((item) => !!item.title && !item.hideInExcel)

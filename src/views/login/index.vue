@@ -76,7 +76,7 @@
 
         <div class="mt-20 flex items-center">
           <n-button
-            class="h-40 flex-1 rounded-5 text-16"
+            class="h-40 flex-1 rounded-5 text-12"
             type="primary"
             ghost
             @click="quickLogin()"
@@ -85,12 +85,21 @@
           </n-button>
 
           <n-button
-            class="ml-32 h-40 flex-1 rounded-5 text-16"
+            class="ml-32 h-40 flex-1 rounded-5 text-12"
             type="primary"
             :loading="loading"
             @click="handleLogin()"
           >
             登录
+          </n-button>
+
+          <n-button
+            class="ml-12 h-40 flex-1 rounded-5 text-12"
+            type="primary"
+            :loading="loading"
+            @click="handleOAuth2Login()"
+          >
+            OAuth2快捷登录
           </n-button>
         </div>
       </div>
@@ -105,6 +114,7 @@ import { throttle, lStorage } from '@/utils'
 import { useStorage } from '@vueuse/core'
 import api from './api'
 import { useAuthStore } from '@/store'
+import { handleOAuth2Login } from '@/utils/auth.js'
 
 const authStore = useAuthStore()
 const router = useRouter()
