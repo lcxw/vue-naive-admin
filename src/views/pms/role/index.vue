@@ -110,8 +110,8 @@ onMounted(() => {
 })
 
 const columns = [
-  { title: '角色名', key: 'name' },
-  { title: '角色编码', key: 'code' },
+  { title: '角色名', key: 'roleContent' },
+  { title: '角色编码', key: 'roleId' },
   {
     title: '状态',
     key: 'enable',

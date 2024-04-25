@@ -10,7 +10,7 @@ import { request } from '@/utils'
 
 export default {
   create: (data) => request.post('/role', data),
-  read: (params = {}) => request.get('/role/page', { params }),
+  read: (params = {}) => request.get('/oidc-server/role/page', { params }),
   update: (data) => request.patch(`/role/${data.id}`, data),
   delete: (id) => request.delete(`/role/${id}`),
 
