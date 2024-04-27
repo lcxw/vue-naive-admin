@@ -26,8 +26,8 @@
         :render-prefix="renderPrefix"
         :render-suffix="renderSuffix"
         :on-update:selected-keys="onSelect"
-        key-field="code"
-        label-field="name"
+        key-field="permissionCode"
+        label-field="title"
         block-line
         default-expand-all
       />

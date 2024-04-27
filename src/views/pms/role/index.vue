@@ -68,8 +68,8 @@
         </n-form-item>
         <n-form-item label="权限" path="permissionIds">
           <n-tree
-            key-field="id"
-            label-field="name"
+            key-field="permissionId"
+            label-field="title"
             :selectable="false"
             :data="permissionTree"
             :checked-keys="modalForm.permissionIds"
@@ -147,7 +147,10 @@ const columns = [
             type: 'primary',
             secondary: true,
             onClick: () =>
-              router.push({ path: `/pms/role/user/${row.id}`, query: { roleName: row.name } }),
+              router.push({
+                path: `/pms/role/user/${row.roleContent}`,
+                query: { roleName: row.name },
+              }),
           },
           {
             default: () => '分配用户',

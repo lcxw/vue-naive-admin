@@ -74,7 +74,7 @@ export const usePermissionStore = defineStore('permission', {
           parentKey,
           btns: item.children
             ?.filter((item) => item.type === 'BUTTON' || item.type === '2')
-            ?.map((item) => ({ code: item.code, name: item.name })),
+            ?.map((item) => ({ code: item.permissionCode, name: item.name })),
         },
       }
     },

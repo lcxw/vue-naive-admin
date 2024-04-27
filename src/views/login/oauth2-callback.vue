@@ -2,7 +2,6 @@
 import { useRoute, useRouter } from 'vue-router'
 import { ref, watch } from 'vue'
 import api from '@/api'
-import { initUserAndPermissions } from '@/router/index.js'
 import { useAuthStore } from '@/store/index.js'
 import { AxiosHeaders as Buffer } from 'axios'
 
@@ -51,7 +50,6 @@ const handleCodeToToken = async () => {
   })
   $message.loading('登录中...', { key: 'login' })
   try {
-    initUserAndPermissions()
     $message.success('登录成功', { key: 'login' })
     if (route.query.redirect) {
       const path = route.query.redirect
