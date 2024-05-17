@@ -11,9 +11,9 @@ import { request } from '@/utils'
 
 export default {
   getMenuTree: () => request.get('/oidc-server/permission/permissionTree'),
-  getButtons: ({ parentId }) => request.get(`/permission/button/${parentId}`),
+  getButtons: ({ parentId }) => request.get(`/oidc-server/permission/${parentId}`),
   getComponents: () => axios.get(`${import.meta.env.VITE_PUBLIC_PATH}components.json`),
-  addPermission: (data) => request.post('/oidc-server/system/permission/add', data),
+  addPermission: (data) => request.post('/oidc-server/permission/add', data),
   savePermission: (id, data) => request.patch(`/permission/${id}`, data),
-  deletePermission: (id) => request.delete(`permission/${id}`),
+  deletePermission: (id) => request.post(`/oidc-server/permission/delete/${id}`),
 }

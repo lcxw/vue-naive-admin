@@ -21,23 +21,23 @@
             v-model:value="modalForm.parentId"
             :options="menuOptions"
             :disabled="parentIdDisabled"
-            label-field="name"
-            key-field="id"
+            label-field="title"
+            key-field="permissionId"
             placeholder="根菜单"
             clearable
           />
         </n-form-item-gi>
-        <n-form-item-gi :span="12" path="name" :rule="required">
+        <n-form-item-gi :span="12" path="title" :rule="required">
           <template #label>
             <QuestionLabel label="名称" content="标题" />
           </template>
-          <n-input v-model:value="modalForm.name" />
+          <n-input v-model:value="modalForm.title" />
         </n-form-item-gi>
-        <n-form-item-gi :span="12" path="code" :rule="required">
+        <n-form-item-gi :span="12" path="permissionCode" :rule="required">
           <template #label>
             <QuestionLabel label="编码" content="如果是菜单则对应前端路由的name，使用大驼峰" />
           </template>
-          <n-input v-model:value="modalForm.code" />
+          <n-input v-model:value="modalForm.permissionCode" />
         </n-form-item-gi>
         <n-form-item-gi
           v-if="modalForm.type === 'MENU'"
@@ -163,7 +163,9 @@ const props = defineProps({
 const emit = defineEmits(['refresh'])
 
 const menuOptions = computed(() => {
-  return [{ name: '根菜单', id: '', children: props.menus || [] }]
+  return [
+    { title: '根菜单', name: '根菜单', id: '', permissionId: '', children: props.menus || [] },
+  ]
 })
 const componentOptions = pagePathes.map((path) => ({ label: path, value: path }))
 const iconOptions = icons.map((item) => ({
@@ -190,11 +192,12 @@ const [modalRef, okLoading] = useModal()
 
 const modalAction = ref('')
 const parentIdDisabled = ref(false)
+
 function handleOpen(options = {}) {
   const { action, row = {}, ...rest } = options
   modalAction.value = action
   modalForm.value = { ...defaultForm, ...row }
-  parentIdDisabled.value = !!row.parentId && row.type === 'BUTTON'
+  parentIdDisabled.value = !!row.parentId && (row.type === 'BUTTON' || row.type === 1 || true)
   modalRef.value.open({ ...rest, onOk: onSave })
 }
 
