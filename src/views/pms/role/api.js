@@ -9,7 +9,7 @@
 import { request } from '@/utils'
 
 export default {
-  create: (data) => request.post('/oidc-server//system/role/add', data),
+  create: (data) => request.post('/oidc-server/system/role/add', data),
   read: (params = {}) => request.get('/oidc-server/role/page', { params }),
   update: (data) => request.patch(`/role/${data.id}`, data),
   delete: (id) => request.delete(`/role/${id}`),
