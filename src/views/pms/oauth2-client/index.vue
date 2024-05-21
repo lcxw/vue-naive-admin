@@ -154,12 +154,21 @@ const { modalRef, modalFormRef, modalAction, modalForm, handleAdd, handleDelete,
     initForm: { enable: true },
     refresh: () => $table.value?.handleSearch(),
   })
+let clientScpoes = ref({})
 
 function handleEditWithData(row) {
-  console.log(row)
-  const res = api.getDetails(row.Id)
-  console.info(res)
-  handleEdit(row)
+  // console.log(row)
+  api.getDetails(row.id).then((result) => {
+    // console.info(res)
+    let scopes = result.scopes
+    console.log(scopes)
+    scopes.forEach((s) => {
+      let scope1 = s.scope
+      console.log(scope1)
+    })
+    clientScpoes = scopes.map((s) => s.scope).join(',')
+    handleEdit(row)
+  })
 }
 </script>
 
@@ -274,7 +283,7 @@ function handleEditWithData(row) {
         </n-form-item>
         <n-form-item
           label="授权范围"
-          path="scope"
+          path="clientScpoes"
           :rule="{
             required: true,
             message: '请输入授权范围',
@@ -282,7 +291,7 @@ function handleEditWithData(row) {
           }"
         >
           <n-input
-            v-model:value="modalForm.scope"
+            v-model:value="clientScpoes"
             placeholder="请输入授权范围，多个用英文逗号隔开"
           />
         </n-form-item>
