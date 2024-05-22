@@ -13,22 +13,27 @@ const clientAuthenticationMethods = ref([
   {
     label: 'client_secret_basic',
     key: 'CLIENT_SECRET_BASIC',
+    value: 'client_secret_basic',
   },
   {
     label: 'client_secret_post',
     key: 'CLIENT_SECRET_POST',
+    value: 'client_secret_post',
   },
   {
     label: 'client_secret_jwt',
     key: 'CLIENT_SECRET_JWT',
+    value: 'client_secret_jwt',
   },
   {
     label: 'private_key_jwt',
     key: 'PRIVATE_KEY_JWT',
+    value: 'private_key_jwt',
   },
   {
     label: 'none',
     key: 'do not check client auth',
+    value: 'none',
     disabled: true,
   },
 ])
@@ -106,7 +111,7 @@ const columns = [
             type: 'primary',
             style: 'margin-left: 12px;',
             disabled: row.code === 'SUPER_ADMIN',
-            onClick: () => handleEditWithData(row),
+            onClick: () => handleEditWithData(modalForm, row),
           },
           {
             default: () => '编辑',
@@ -154,19 +159,82 @@ const { modalRef, modalFormRef, modalAction, modalForm, handleAdd, handleDelete,
     initForm: { enable: true },
     refresh: () => $table.value?.handleSearch(),
   })
-let clientScpoes = ref({})
+let currentClient = ref({})
 
-function handleEditWithData(row) {
+function handleAddClient(row) {
+  currentClient = {
+    id: null,
+    clientId: modalForm.clientName || null,
+    clientSecret: modalForm.clientSecret || null,
+    clientName: modalForm.clientName || null,
+    clientAuthenticationMethods: modalForm.clientAuthenticationMethods || [],
+    authorizationGrantTypes: modalForm.authorizationGrantTypes || [],
+    scopes: modalForm.scopes?.split(',') || [],
+    redirectUris: modalForm.redirectUrls?.split(',') || [],
+    clientSettings: {
+      clientId: modalForm.clientId,
+      requireProofKey: modalForm.requireProofKey,
+      requireAuthorizationConsent: modalForm.requireAuthorizationConsent,
+      jwkSetUrl: modalForm.jwkSetUrl,
+      signingAlgorithm: modalForm.signingAlgorithm,
+    },
+    tokenSettings: {
+      clientId: modalForm.clientId,
+      tokenFormat: modalForm.tokenFormat,
+      reuseRefreshTokens: modalForm.reuseRefreshTokens,
+      idTokenSignatureAlgorithm: modalForm.idTokenSignatureAlgorithm,
+      accessTokenTimeToLive: modalForm.accessTokenTimeToLive,
+      refreshTokenTimeToLive: modalForm.refreshTokenTimeToLive,
+    },
+  }
+  modalFormRef.value = currentClient
+  handleAdd(row)
+  // api.create(currentClient)
+}
+
+function handleEditWithData(modalForm, row) {
   // console.log(row)
   api.getDetails(row.id).then((result) => {
+    currentClient = result
+    let redirectUris = result.redirectUris.map((s) => s.redirectUri).join(',')
+    console.log(redirectUris)
+    currentClient.redirectUris = redirectUris
+    let scopes = result.scopes.map((s) => s.scope).join(',')
+    currentClient.scopes = result.scopes.map((s) => s.scope).join(',')
+    let authorizationGrantTypes = result.authorizationGrantTypes
+      .map((s) => s.clientAuthenticationMethod)
+      .join(',')
+    currentClient.authorizationGrantTypes = authorizationGrantTypes
+    let clientAuthenticationMethods = result.clientAuthenticationMethods
+      .map((s) => s.clientAuthenticationMethod)
+      .join(',')
+    currentClient.clientAuthenticationMethods = clientAuthenticationMethods
     // console.info(res)
-    let scopes = result.scopes
-    console.log(scopes)
-    scopes.forEach((s) => {
-      let scope1 = s.scope
-      console.log(scope1)
-    })
-    clientScpoes = scopes.map((s) => s.scope).join(',')
+    // clientScopes = scopes.map((s) => s.scope).join(',')
+    // let clientRedirectUrls = result.redirectUris.map((s) => s.redirectUri).join(',')
+    // modalForm.scope = clientScopes
+    // modalFormRef.redirectUrls = clientRedirectUrls
+    // modalRef.redirectUrls = clientRedirectUrls
+    // modalForm.redirectUrls = clientRedirectUrls
+    // modalFormRef.currentClient = currentClient
+    // modalForm.currentClient = currentClient
+    modalForm.redirectUris = redirectUris
+    modalForm.scopes = JSON.stringify(scopes) || null
+    modalForm.authorizationGrantTypes = authorizationGrantTypes || null
+    modalForm.clientAuthenticationMethods = clientAuthenticationMethods || null
+    modalForm.clientAuthenticationMethods = clientAuthenticationMethods || null
+    // modalForm.requireProofKey = result.clientSettings.requireProofKey || null
+    // modalForm.requireAuthorizationConsent =
+    //   result.clientSettings.requireAuthorizationConsent || null
+    // modalForm.jwkSetUrl = result.clientSettings.jwkSetUrl || null
+    // modalForm.signingAlgorithm = result.clientSettings.signingAlgorithm || null
+    // modalForm.tokenFormat = result.tokenSettings.tokenFormat || null
+    // modalForm.reuseRefreshTokens = result.tokenSettings.reuseRefreshTokens || null
+    // modalForm.idTokenSignatureAlgorithm = result.tokenSettings.idTokenSignatureAlgorithm || null
+    // modalForm.accessTokenTimeToLive = result.tokenSettings.accessTokenTimeToLive || null
+    // modalForm.refreshTokenTimeToLive = result.tokenSettings.refreshTokenTimeToLive || null
+    // console.log(modalForm.redirectUris)
+    // modalRef.currentClient = currentClient
     handleEdit(row)
   })
 }
@@ -175,7 +243,7 @@ function handleEditWithData(row) {
 <template>
   <CommonPage>
     <template #action>
-      <n-button type="primary" @click="handleAdd()">
+      <n-button type="primary" @click="handleAddClient()">
         <i class="i-material-symbols:add mr-4 text-18" />
         新增客户端
       </n-button>
@@ -222,7 +290,7 @@ function handleEditWithData(row) {
           :rule="{
             required: true,
             message: '请输入客户端名称',
-            trigger: ['input', 'blur'],
+            // trigger: ['input', 'blur'],
           }"
         >
           <n-input v-model:value="modalForm.clientName" />
@@ -231,7 +299,7 @@ function handleEditWithData(row) {
           label="客户端类型"
           path="clientType"
           :rule="{
-            required: true,
+            required: false,
             message: '请选择客户端类型',
             trigger: ['input', 'blur'],
           }"
@@ -245,15 +313,17 @@ function handleEditWithData(row) {
         </n-form-item>
         <n-form-item
           label="客户端认证方式"
-          path="clientAuthenticationMethod"
+          path="clientAuthenticationMethods"
           :rule="{
-            required: true,
+            required: false,
             message: '请选择客户端认证方式',
-            trigger: ['input', 'blur'],
+            // trigger: ['input', 'blur'],
           }"
         >
           <n-select
-            v-model:value="modalForm.clientAuthenticationMethod"
+            v-model:value="modalForm.clientAuthenticationMethods"
+            multiple
+            filterable
             name="clientAuthenticationMethod"
             trigger="click"
             :options="clientAuthenticationMethods"
@@ -266,13 +336,17 @@ function handleEditWithData(row) {
           label="授权方式"
           path="authorizationGrantType"
           :rule="{
-            required: true,
+            required: false,
             message: '请选授权方式',
             trigger: ['input', 'blur'],
           }"
         >
           <n-select
-            v-model:value="modalForm.authorizationGrantType"
+            v-model:value="modalForm.authorizationGrantTypes"
+            multiple
+            filterabl
+            placeholder="选择授权方式"
+            clearable
             name="clientAuthenticationMethod"
             trigger="click"
             :options="authorizationGrantTypes"
@@ -283,29 +357,29 @@ function handleEditWithData(row) {
         </n-form-item>
         <n-form-item
           label="授权范围"
-          path="clientScpoes"
+          path="scopes"
           :rule="{
-            required: true,
+            required: false,
             message: '请输入授权范围',
             trigger: ['input', 'blur'],
           }"
         >
           <n-input
-            v-model:value="clientScpoes"
+            v-model:value="modalForm.scopes"
             placeholder="请输入授权范围，多个用英文逗号隔开"
           />
         </n-form-item>
         <n-form-item
           label="重定向地址"
-          path="redirectUri"
+          path="redirectUris"
           :rule="{
-            required: true,
-            message: '请输入授权范围',
+            required: false,
+            message: '请输入回调地址列表',
             trigger: ['input', 'blur'],
           }"
         >
           <n-input
-            v-model:value="modalForm.redirectUri"
+            v-model:value="modalForm.redirectUris"
             placeholder="请输入重定向uri，多个用英文逗号隔开"
           />
         </n-form-item>
@@ -313,19 +387,22 @@ function handleEditWithData(row) {
           label="是否需要用户同意"
           path="proofKey"
           :rule="{
-            required: true,
+            required: false,
             message: '请选择客户端类型',
             trigger: ['input', 'blur'],
           }"
         >
-          <n-radio-group v-model:value="modalForm.proofKey" name="proofKey">
-            <n-radio value="required" checked="checked">需要</n-radio>
-            <n-radio value="notRequired">不需要</n-radio>
-          </n-radio-group>
+          <n-switch
+            v-model:value="modalForm.clientSettings.requireProofKey"
+            value="active"
+            checked="checked"
+          >
+            需要
+          </n-switch>
         </n-form-item>
         <n-form-item label="授权确认" path="requireAuthorizationConsent">
           <n-switch
-            v-model:value="modalForm.requireAuthorizationConsent"
+            v-model:value="modalForm.clientSettings.requireAuthorizationConsent"
             value="active"
             checked="checked"
           >
@@ -336,13 +413,13 @@ function handleEditWithData(row) {
           label="JWK端点"
           path="jwkSetUrl"
           :rule="{
-            required: true,
+            required: false,
             message: '请输入jwkSetUrl',
             trigger: ['input', 'blur'],
           }"
         >
           <n-input
-            v-model:value="modalForm.jwkSetUrl"
+            v-model:value="modalForm.clientSettings.jwkSetUrl"
             placeholder="授权方式为PRIVATE_KEY_JWT时请输入客户端提供的jwkSetUrl"
           />
         </n-form-item>
@@ -356,7 +433,7 @@ function handleEditWithData(row) {
           }"
         >
           <n-input
-            v-model:value="modalForm.signingAlgorithm"
+            v-model:value="modalForm.clientSettings.signingAlgorithm"
             placeholder="认证方式为CLIENT_SECRET_JWT或PRIVATE_KEY_JWT时需要指定签名算法"
           />
         </n-form-item>
@@ -364,13 +441,13 @@ function handleEditWithData(row) {
           label="访问令牌TTL（s）"
           path="accessTokenTimeToLive"
           :rule="{
-            required: true,
+            required: false,
             message: '请输入accessTokenTimeToLive',
             trigger: ['input', 'blur'],
           }"
         >
           <n-input
-            v-model:value="modalForm.accessTokenTimeToLive"
+            v-model:value="modalForm.tokenSettings.accessTokenTimeToLive"
             placeholder="访问令牌生存时间，单位秒"
             type="number"
             value="86400000"
@@ -380,19 +457,19 @@ function handleEditWithData(row) {
           label="令牌格式"
           path="tokenFormat"
           :rule="{
-            required: true,
+            required: false,
             message: '请选择令牌格式',
             trigger: ['input', 'blur'],
           }"
         >
-          <n-radio-group v-model:value="modalForm.tokenFormat" name="tokenFormat">
-            <n-radio value="jwt" checked="checked">透明令牌</n-radio>
+          <n-radio-group v-model:value="modalForm.tokenSettings.tokenFormat" name="tokenFormat">
+            <n-radio value="self-contained" checked="checked">透明令牌</n-radio>
             <n-radio value="oq">不透明令牌</n-radio>
           </n-radio-group>
         </n-form-item>
         <n-form-item label="复用刷新令牌" path="reuseRefreshTokens">
           <n-switch
-            v-model:value="modalForm.reuseRefreshTokens"
+            v-model:value="modalForm.tokenSettings.reuseRefreshTokens"
             value="reuseRefreshTokens"
             checked="checked"
           >
@@ -403,13 +480,13 @@ function handleEditWithData(row) {
           label="刷新令牌TTL（s）"
           path="refreshTokenTimeToLive"
           :rule="{
-            required: true,
+            required: false,
             message: '请输入refreshTokenTimeToLive',
             trigger: ['input', 'blur'],
           }"
         >
           <n-input
-            v-model:value="modalForm.refreshTokenTimeToLive"
+            v-model:value="modalForm.tokenSettings.refreshTokenTimeToLive"
             placeholder="访问令牌生存时间，单位秒"
             type="number"
             value="86400000"
@@ -419,13 +496,13 @@ function handleEditWithData(row) {
           label="ID Token签名算法"
           path="idTokenSignatureAlgorithm"
           :rule="{
-            required: true,
+            required: false,
             message: '请输入idTokenSignatureAlgorithm',
             trigger: ['input', 'blur'],
           }"
         >
           <n-input
-            v-model:value="modalForm.idTokenSignatureAlgorithm"
+            v-model:value="modalForm.tokenSettings.idTokenSignatureAlgorithm"
             placeholder="认证方式为CLIENT_SECRET_JWT或PRIVATE_KEY_JWT时需要指定签名算法"
           />
         </n-form-item>
