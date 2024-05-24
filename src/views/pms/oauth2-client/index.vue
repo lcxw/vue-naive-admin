@@ -14,26 +14,31 @@ const clientAuthenticationMethods = ref([
     label: 'client_secret_basic',
     key: 'CLIENT_SECRET_BASIC',
     value: 'client_secret_basic',
+    clientAuthenticationMethod: 'client_secret_basic',
   },
   {
     label: 'client_secret_post',
     key: 'CLIENT_SECRET_POST',
     value: 'client_secret_post',
+    clientAuthenticationMethod: 'client_secret_post',
   },
   {
     label: 'client_secret_jwt',
     key: 'CLIENT_SECRET_JWT',
     value: 'client_secret_jwt',
+    clientAuthenticationMethod: 'client_secret_jwt',
   },
   {
     label: 'private_key_jwt',
     key: 'PRIVATE_KEY_JWT',
     value: 'private_key_jwt',
+    clientAuthenticationMethod: 'private_key_jwt',
   },
   {
     label: 'none',
     key: 'do not check client auth',
     value: 'none',
+    clientAuthenticationMethod: 'none',
     disabled: true,
   },
 ])
@@ -41,26 +46,32 @@ const authorizationGrantTypes = ref([
   {
     label: 'authorization_code',
     key: 'AUTHORIZATION_CODE',
+    value: 'authorization_code',
   },
   {
     label: 'refresh_token',
     key: 'REFRESH_TOKEN',
+    value: 'refresh_token',
   },
   {
     label: 'client_credentials',
     key: 'CLIENT_CREDENTIALS',
+    value: 'client_credentials',
   },
   {
     label: 'password',
     key: 'PASSWORD',
+    value: 'password',
   },
   {
     label: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
     key: 'JWT_BEARER',
+    value: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
   },
   {
     label: 'urn:ietf:params:oauth:grant-type:device_code',
     key: 'DEVICE_CODE',
+    value: 'urn:ietf:params:oauth:grant-type:device_code',
   },
 ])
 onMounted(() => {
@@ -192,22 +203,36 @@ function handleAddClient(row) {
   // api.create(currentClient)
 }
 
+let clientScopes = ref([])
+let clientType = ref(false)
+let clientRedirectUris = ref([])
+let authorizationGrantType = ref([])
+let clientAuthenticationMethod = ref([])
+
 function handleEditWithData(modalForm, row) {
   // console.log(row)
   api.getDetails(row.id).then((result) => {
     currentClient = result
-    let redirectUris = result.redirectUris.map((s) => s.redirectUri).join(',')
+    let redirectUris = result.redirectUris.map((s) => s.redirectUri)
     console.log(redirectUris)
+    console.log(typeof redirectUris)
+    console.log(Array.isArray(redirectUris))
     currentClient.redirectUris = redirectUris
-    let scopes = result.scopes.map((s) => s.scope).join(',')
+    // convert scopes to scope array
+    let scopes = result.scopes.map((s) => s.scope)
+    // clientScopes = scopes
     currentClient.scopes = result.scopes.map((s) => s.scope).join(',')
-    let authorizationGrantTypes = result.authorizationGrantTypes
-      .map((s) => s.clientAuthenticationMethod)
-      .join(',')
+    let authorizationGrantTypes = result.authorizationGrantTypes.map((s) => s.grantTypeName)
+    clientScopes = scopes
+    clientRedirectUris = redirectUris
+    // .join(',')
     currentClient.authorizationGrantTypes = authorizationGrantTypes
-    let clientAuthenticationMethods = result.clientAuthenticationMethods
-      .map((s) => s.clientAuthenticationMethod)
-      .join(',')
+    let clientAuthenticationMethods = result.clientAuthenticationMethods.map(
+      (s) => s.clientAuthenticationMethod
+    )
+    clientAuthenticationMethod = clientAuthenticationMethods
+    authorizationGrantType = authorizationGrantTypes
+    // .join(',')
     currentClient.clientAuthenticationMethods = clientAuthenticationMethods
     // console.info(res)
     // clientScopes = scopes.map((s) => s.scope).join(',')
@@ -218,11 +243,11 @@ function handleEditWithData(modalForm, row) {
     // modalForm.redirectUrls = clientRedirectUrls
     // modalFormRef.currentClient = currentClient
     // modalForm.currentClient = currentClient
-    modalForm.redirectUris = redirectUris
-    modalForm.scopes = JSON.stringify(scopes) || null
-    modalForm.authorizationGrantTypes = authorizationGrantTypes || null
-    modalForm.clientAuthenticationMethods = clientAuthenticationMethods || null
-    modalForm.clientAuthenticationMethods = clientAuthenticationMethods || null
+    // modalForm.redirectUris = redirectUris || []
+    // modalForm.scopes = clientScopes || []
+    // modalForm.authorizationGrantTypes = authorizationGrantTypes || []
+    // modalForm.clientAuthenticationMethods = clientAuthenticationMethods || []
+    // modalForm.clientAuthenticationMethods = clientAuthenticationMethods || null
     // modalForm.requireProofKey = result.clientSettings.requireProofKey || null
     // modalForm.requireAuthorizationConsent =
     //   result.clientSettings.requireAuthorizationConsent || null
@@ -235,8 +260,10 @@ function handleEditWithData(modalForm, row) {
     // modalForm.refreshTokenTimeToLive = result.tokenSettings.refreshTokenTimeToLive || null
     // console.log(modalForm.redirectUris)
     // modalRef.currentClient = currentClient
+    console.log(modalForm)
     handleEdit(row)
   })
+  modalForm.scopes = row.scopes.map((s) => s.scope) || []
 }
 </script>
 
@@ -313,7 +340,7 @@ function handleEditWithData(modalForm, row) {
         </n-form-item>
         <n-form-item
           label="客户端认证方式"
-          path="clientAuthenticationMethods"
+          path="clientAuthenticationMethod"
           :rule="{
             required: false,
             message: '请选择客户端认证方式',
@@ -324,7 +351,10 @@ function handleEditWithData(modalForm, row) {
             v-model:value="modalForm.clientAuthenticationMethods"
             multiple
             filterable
-            name="clientAuthenticationMethod"
+            :children-field="clientAuthenticationMethods"
+            label-field="clientAuthenticationMethod"
+            value-field="clientAuthenticationMethod"
+            name="clientAuthenticationMethods"
             trigger="click"
             :options="clientAuthenticationMethods"
             @select="handleSelect"
@@ -334,7 +364,7 @@ function handleEditWithData(modalForm, row) {
         </n-form-item>
         <n-form-item
           label="授权方式"
-          path="authorizationGrantType"
+          path="authorizationGrantTypes"
           :rule="{
             required: false,
             message: '请选授权方式',
@@ -342,12 +372,11 @@ function handleEditWithData(modalForm, row) {
           }"
         >
           <n-select
-            v-model:value="modalForm.authorizationGrantTypes"
+            v-model:value="modalForm.authorizationGrantTypes.grantTypeName"
             multiple
             filterabl
             placeholder="选择授权方式"
-            clearable
-            name="clientAuthenticationMethod"
+            name="authorizationGrantTypes"
             trigger="click"
             :options="authorizationGrantTypes"
             @select="handleSelect"
@@ -355,33 +384,65 @@ function handleEditWithData(modalForm, row) {
             <n-button>请选授权方式</n-button>
           </n-select>
         </n-form-item>
-        <n-form-item
-          label="授权范围"
-          path="scopes"
-          :rule="{
-            required: false,
-            message: '请输入授权范围',
-            trigger: ['input', 'blur'],
-          }"
-        >
-          <n-input
+        <n-form-item>
+          <n-dynamic-input
             v-model:value="modalForm.scopes"
+            :key-field="scope"
+            :default-value="['profile', 'openid', 'email', 'phone']"
             placeholder="请输入授权范围，多个用英文逗号隔开"
-          />
+            :min="1"
+            :max="10"
+            #="{ index }"
+          >
+            <div style="display: flex">
+              <!--
+                通常，path 的变化会导致 form-item 验证内容或规则的改变，所以 naive-ui 会清理掉
+                表项已有的验证信息。但是这个例子是个特殊情况，我们明确的知道，path 的改变不会导致
+                form-item 验证内容和规则的变化，所以就 ignore-path-change
+              -->
+              <n-form-item
+                ignore-path-change
+                :show-label="false"
+                :path="`modalForm.scopes[${index}].clientId`"
+              >
+                <n-input
+                  v-model:value="modalForm.scopes[index].clientId"
+                  placeholder="Name"
+                  @keydown.enter.prevent
+                />
+                <!--
+                  由于在 input 元素里按回车会导致 form 里面的 button 被点击，所以阻止了默认行为
+                -->
+              </n-form-item >
+              <div style="height: 34px; line-height: 34px; margin: 0 8px">=</div>
+              <n-form-item
+                ignore-path-change
+                :show-label="false"
+                label="授权方式"
+                :path="`modalForm.scopes[${index}].scope`"
+              >
+                <n-input
+                  v-model:value="modalForm.scopes[index].scope"
+                  placeholder="Value"
+                  @keydown.enter.prevent
+                />
+              </n-form-item>
+            </div>
+          </n-dynamic-input>
         </n-form-item>
-        <n-form-item
-          label="重定向地址"
-          path="redirectUris"
-          :rule="{
-            required: false,
-            message: '请输入回调地址列表',
-            trigger: ['input', 'blur'],
-          }"
-        >
-          <n-input
+
+        <n-form-item label="重定向地址" path="redirectUri">
+          <n-dynamic-input
             v-model:value="modalForm.redirectUris"
             placeholder="请输入重定向uri，多个用英文逗号隔开"
-          />
+            #="{ index }"
+          >
+            <n-input
+              :key="index"
+              v-model:value="modalForm.redirectUris[index].redirectUri"
+              :placeholder="`请选择${modalForm.redirectUris[index].redirectUri}`"
+            />
+          </n-dynamic-input>
         </n-form-item>
         <n-form-item
           label="是否需要用户同意"
@@ -463,8 +524,8 @@ function handleEditWithData(modalForm, row) {
           }"
         >
           <n-radio-group v-model:value="modalForm.tokenSettings.tokenFormat" name="tokenFormat">
-            <n-radio value="self-contained" checked="checked">透明令牌</n-radio>
-            <n-radio value="oq">不透明令牌</n-radio>
+            <n-radio value="self-contained" checked="checked">透明令牌(jwt/jws)</n-radio>
+            <n-radio value="reference">不透明令牌(opaque)</n-radio>
           </n-radio-group>
         </n-form-item>
         <n-form-item label="复用刷新令牌" path="reuseRefreshTokens">
