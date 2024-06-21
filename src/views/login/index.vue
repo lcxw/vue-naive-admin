@@ -76,7 +76,7 @@
 
         <div class="mt-20 flex items-center">
           <n-button
-            class="h-40 flex-1 rounded-5 text-16"
+            class="h-40 flex-1 rounded-5 text-12"
             type="primary"
             ghost
             @click="quickLogin()"
@@ -85,12 +85,21 @@
           </n-button>
 
           <n-button
-            class="ml-32 h-40 flex-1 rounded-5 text-16"
+            class="ml-32 h-40 flex-1 rounded-5 text-12"
             type="primary"
             :loading="loading"
             @click="handleLogin()"
           >
             登录
+          </n-button>
+
+          <n-button
+            class="ml-12 h-40 flex-1 rounded-5 text-12"
+            type="primary"
+            :loading="loading"
+            @click="handleOAuth2Login()"
+          >
+            OAuth2快捷登录
           </n-button>
         </div>
       </div>
@@ -103,8 +112,9 @@
 <script setup>
 import { useStorage } from '@vueuse/core'
 import api from './api'
-import { lStorage, throttle } from '@/utils'
 import { useAuthStore } from '@/store'
+import { lStorage, throttle } from '@/utils'
+import { handleOAuth2Login } from '@/utils/auth.js'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -112,13 +122,15 @@ const route = useRoute()
 const title = import.meta.env.VITE_TITLE
 
 const loginInfo = ref({
-  username: '',
-  password: '',
+  username: 'root',
+  password: 'idserver',
 })
 
 const captchaUrl = ref('')
 const initCaptcha = throttle(() => {
-  captchaUrl.value = `${import.meta.env.VITE_AXIOS_BASE_URL}/auth/captcha?${Date.now()}`
+  api.getCaptcha().then((r) => {
+    captchaUrl.value = `data:image/png;base64,${r.data.imageData}`
+  })
 }, 500)
 
 const localLoginInfo = lStorage.get('loginInfo')
@@ -145,7 +157,11 @@ async function handleLogin(isQuick) {
   try {
     loading.value = true
     $message.loading('正在验证，请稍后...', { key: 'login' })
-    const { data } = await api.login({ username, password: password.toString(), captcha, isQuick })
+    const formData = new FormData()
+    formData.append('username', username)
+    formData.append('password', password)
+    // formData.append('captcha', captcha)
+    const { data } = await api.login(formData)
     if (isRemember.value) {
       lStorage.set('loginInfo', { username, password })
     }
@@ -167,6 +183,7 @@ async function handleLogin(isQuick) {
 }
 
 async function onLoginSuccess(data = {}) {
+  router.push('/')
   authStore.setToken(data)
   $message.loading('登录中...', { key: 'login' })
   try {

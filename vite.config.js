@@ -53,6 +53,18 @@ export default defineConfig(({ mode }) => {
       port: 3200,
       open: false,
       proxy: {
+        '/api/oidc-server': {
+          target: 'http://127.0.0.1:20005',
+          changeOrigin: true,
+          rewrite: path => path.replace(/^\/api\/oidc-server/, ''),
+          secure: false,
+          configure: (proxy, options) => {
+            // 配置此项可在响应头中看到请求的真实地址
+            proxy.on('proxyRes', (proxyRes, req) => {
+              proxyRes.headers['x-real-url'] = new URL(req.url || '', options.target)?.href || ''
+            })
+          },
+        },
         '/api': {
           target: VITE_PROXY_TARGET,
           changeOrigin: true,
