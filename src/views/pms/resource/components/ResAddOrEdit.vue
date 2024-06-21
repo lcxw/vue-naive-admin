@@ -21,23 +21,26 @@
             v-model:value="modalForm.parentId"
             :options="menuOptions"
             :disabled="parentIdDisabled"
-            label-field="name"
-            key-field="id"
+            label-field="title"
+            key-field="permissionId"
             placeholder="根菜单"
             clearable
           />
         </n-form-item-gi>
-        <n-form-item-gi :span="12" path="name" :rule="required">
+        <n-form-item-gi :span="12" path="title" :rule="required">
           <template #label>
             <QuestionLabel label="名称" content="标题" />
           </template>
-          <n-input v-model:value="modalForm.name" />
+          <n-input v-model:value="modalForm.title" />
         </n-form-item-gi>
-        <n-form-item-gi :span="12" path="code" :rule="required">
+        <n-form-item-gi :span="12" path="permissionCode" :rule="required">
           <template #label>
-            <QuestionLabel label="编码" content="如果是菜单则对应前端路由的name，使用大驼峰" />
+            <QuestionLabel
+              label="编码"
+              content="如果是菜单则对应前端路由的name，使用大驼峰"
+            />
           </template>
-          <n-input v-model:value="modalForm.code" />
+          <n-input v-model:value="modalForm.permissionCode" />
         </n-form-item-gi>
         <n-form-item-gi
           v-if="modalForm.type === 'MENU'"
@@ -49,9 +52,9 @@
             message: '必须是/、http、https开头',
             validator(rule, value) {
               if (value) {
-                return /\/|http|https/.test(value)
+                return /\/|http|https/.test(value);
               }
-              return true
+              return true;
             },
           }"
         >
@@ -67,18 +70,35 @@
               content="如material-symbols:help，图标库地址: https://icones.js.org/collection/all"
             />
           </template>
-          <n-select v-model:value="modalForm.icon" :options="iconOptions" clearable filterable />
+          <n-select
+            v-model:value="modalForm.icon"
+            :options="iconOptions"
+            clearable
+            filterable
+          />
         </n-form-item-gi>
-        <n-form-item-gi v-if="modalForm.type === 'MENU'" :span="12" path="layout">
+        <n-form-item-gi
+          v-if="modalForm.type === 'MENU'"
+          :span="12"
+          path="layout"
+        >
           <template #label>
             <QuestionLabel
               label="layout"
               content="对应layouts文件夹下的目录名, 为空则默认为 default"
             />
           </template>
-          <n-select v-model:value="modalForm.layout" :options="layoutOptions" clearable />
+          <n-select
+            v-model:value="modalForm.layout"
+            :options="layoutOptions"
+            clearable
+          />
         </n-form-item-gi>
-        <n-form-item-gi v-if="modalForm.type === 'MENU'" :span="24" path="component">
+        <n-form-item-gi
+          v-if="modalForm.type === 'MENU'"
+          :span="24"
+          path="component"
+        >
           <template #label>
             <QuestionLabel
               label="组件路径"
@@ -96,7 +116,10 @@
 
         <n-form-item-gi v-if="modalForm.type === 'MENU'" :span="12" path="show">
           <template #label>
-            <QuestionLabel label="显示状态" content="控制是否在菜单栏显示，不影响路由注册" />
+            <QuestionLabel
+              label="显示状态"
+              content="控制是否在菜单栏显示，不影响路由注册"
+            />
           </template>
           <n-switch v-model:value="modalForm.show">
             <template #checked>
@@ -123,7 +146,11 @@
             </template>
           </n-switch>
         </n-form-item-gi>
-        <n-form-item-gi v-if="modalForm.type === 'MENU'" :span="12" path="keepAlive">
+        <n-form-item-gi
+          v-if="modalForm.type === 'MENU'"
+          :span="12"
+          path="keepAlive"
+        >
           <template #label>
             <QuestionLabel
               label="KeepAlive"
@@ -175,7 +202,9 @@ const props = defineProps({
 const emit = defineEmits(['refresh'])
 
 const menuOptions = computed(() => {
-  return [{ name: '根菜单', id: '', children: props.menus || [] }]
+  return [
+    { title: '根菜单', name: '根菜单', id: '', permissionId: '', children: props.menus || [] },
+  ]
 })
 const componentOptions = pagePathes.map(path => ({ label: path, value: path }))
 const iconOptions = icons.map(item => ({
@@ -202,11 +231,12 @@ const [modalRef, okLoading] = useModal()
 
 const modalAction = ref('')
 const parentIdDisabled = ref(false)
+
 function handleOpen(options = {}) {
   const { action, row = {}, ...rest } = options
   modalAction.value = action
   modalForm.value = { ...defaultForm, ...row }
-  parentIdDisabled.value = !!row.parentId && row.type === 'BUTTON'
+  parentIdDisabled.value = !!row.parentId && (row.type === 'BUTTON' || row.type === 2)
   modalRef.value.open({ ...rest, onOk: onSave })
 }
 
@@ -222,7 +252,7 @@ async function onSave() {
       newFormData = res.data
     }
     else if (modalAction.value === 'edit') {
-      await api.savePermission(modalForm.value.id, modalForm.value)
+      await api.savePermission(modalForm.value.id || modalForm.value.permissionId, modalForm.value)
     }
     okLoading.value = false
     $message.success('保存成功')
