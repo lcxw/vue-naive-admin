@@ -9,7 +9,7 @@
 <template>
   <CommonPage>
     <template #action>
-      <NButton v-permission="'AddUser'" type="primary" @click="handleAdd()">
+      <NButton v-permission="'user:add'" type="primary" @click="handleAdd()">
         <i class="i-material-symbols:add mr-4 text-18" />
         创建新用户
       </NButton>
@@ -79,13 +79,24 @@
         >
           <n-input v-model:value="modalForm.password" />
         </n-form-item>
-
+        <n-form-item
+          v-if="['add', 'reset'].includes(modalAction)"
+          label="手机号"
+          path="phoneNumber"
+          :rule="{
+            required: true,
+            message: '请输入手机号',
+            trigger: ['input', 'blur'],
+          }"
+        >
+          <n-input v-model:value="modalForm.phoneNumber" />
+        </n-form-item>
         <n-form-item v-if="['add', 'setRole'].includes(modalAction)" label="角色" path="roleIds">
           <n-select
             v-model:value="modalForm.roleIds"
             :options="roles"
-            label-field="name"
-            value-field="id"
+            label-field="roleContent"
+            value-field="roleId"
             clearable
             filterable
             multiple
@@ -131,7 +142,7 @@ const genders = [
   { label: '女', value: 2 },
 ]
 const roles = ref([])
-api.getAllRoles().then(({ data = [] }) => (roles.value = data))
+api.getAllRoles().then(({ data = [] }) => (roles.value = data.records))
 
 const {
   modalRef,
@@ -174,7 +185,7 @@ const columns = [
           h(
             NTag,
             { type: 'success', style: index > 0 ? 'margin-left: 8px;' : '' },
-            { default: () => item.name },
+            { default: () => item.roleContent },
           ),
         )
       }
@@ -284,7 +295,7 @@ async function handleEnable(row) {
 }
 
 function handleOpenRolesSet(row) {
-  const roleIds = row.roles.map(item => item.id)
+  const roleIds = row.roles?.map(item => item.roleIds) || []
   handleOpen({
     action: 'setRole',
     title: '分配角色',

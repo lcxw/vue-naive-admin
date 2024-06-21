@@ -9,11 +9,12 @@
 import { request } from '@/utils'
 
 export default {
-  create: data => request.post('/user', data),
-  read: (params = {}) => request.get('/user', { params }),
+  create: data => request.post('/oidc-server/system/user/add', data),
+  read: (params = {}) => request.post('/oidc-server/users', params),
   update: data => request.patch(`/user/${data.id}`, data),
   delete: id => request.delete(`/user/${id}`),
   resetPwd: (id, data) => request.patch(`/user/password/reset/${id}`, data),
 
-  getAllRoles: () => request.get('/role?enable=1'),
+  getAllRoles: () =>
+    request.get('/oidc-server/role/page?pageNo=1&pageSize=10&page=1&limit=10&enable=1'),
 }
