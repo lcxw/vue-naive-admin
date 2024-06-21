@@ -21,9 +21,11 @@
 </template>
 
 <script setup>
+import { AxiosHeaders as Buffer } from 'axios'
 import { useAuthStore, usePermissionStore, useUserStore } from '@/store'
 import { RoleSelect } from '@/layouts/components'
 import api from '@/api'
+import { handleOAuth2Login } from '@/utils/auth.js'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -48,9 +50,15 @@ const options = reactive([
     key: 'logout',
     icon: () => h('i', { class: 'i-mdi:exit-to-app text-14' }),
   },
+  {
+    label: '刷新状态',
+    key: 'refresh',
+    icon: () => h('i', { class: 'i-mdi:exit-to-app text-14' }),
+  },
 ])
 
 const roleSelectRef = ref(null)
+
 function handleSelect(key) {
   switch (key) {
     case 'profile':
@@ -80,6 +88,48 @@ function handleSelect(key) {
         },
       })
       break
+    case 'refresh': {
+      const refreshToken = authStore.refreshToken
+      if (refreshToken) {
+        const formData = new FormData()
+        // formData.append('client_id', 'ff9685b0-ac9b-4188-835d-1b8ced815acb')
+        formData.append('grant_type', 'refresh_token')
+        // formData.append('client_secret', 'vueClient')
+        formData.append('refresh_token', refreshToken)
+        const token = `BASIC vueClient:vueClient`
+        const encodedToken = Buffer.from(token).toString('base64')
+        btoa('xxxx' + ':' + 'xxxx')
+        api
+          .refreshToken(formData, {
+            headers: {
+              Authorization: encodedToken,
+            },
+            // auth: {
+            //   username: 'ff9685b0-ac9b-4188-835d-1b8ced815acb',
+            //   password: 'vueClient'
+            // }
+          })
+          .then((res) => {
+            console.log(res)
+            authStore.setToken({
+              accessToken: res.access_token,
+              refreshToken: res.refresh_token,
+              idToken: res.id_token,
+            })
+          })
+          .catch((error) => {
+            console.error(error)
+            authStore.$reset()
+            handleOAuth2Login()
+          })
+      }
+      else {
+        console.debug('no refresh token found')
+        authStore.$reset()
+        handleOAuth2Login()
+      }
+      break
+    }
   }
 }
 </script>

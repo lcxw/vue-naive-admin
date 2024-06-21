@@ -26,10 +26,10 @@
         :render-prefix="renderPrefix"
         :render-suffix="renderSuffix"
         :on-update:selected-keys="onSelect"
-        key-field="code"
-        label-field="name"
-
-        block-line default-expand-all
+        key-field="permissionCode"
+        label-field="title"
+        block-line
+        default-expand-all
       />
     </n-space>
 
@@ -58,6 +58,7 @@ const emit = defineEmits(['refresh', 'update:currentMenu'])
 const pattern = ref('')
 
 const modalRef = ref(null)
+
 async function handleAdd(data = {}) {
   modalRef.value?.handleOpen({
     action: 'add',
@@ -105,11 +106,11 @@ function renderSuffix({ option }) {
 
 function handleDelete(item) {
   $dialog.confirm({
-    content: `确认删除【${item.name}】？`,
+    content: `确认删除【${item.name || item.title || ' '}】？`,
     async confirm() {
       try {
         $message.loading('正在删除', { key: 'deleteMenu' })
-        await api.deletePermission(item.id)
+        await api.deletePermission(item.permissionId)
         $message.success('删除成功', { key: 'deleteMenu' })
         emit('refresh')
         emit('update:currentMenu', null)

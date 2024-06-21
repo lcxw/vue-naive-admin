@@ -10,6 +10,7 @@
 
 import 'uno.css'
 import '@/styles/reset.css'
+import '@/assets/css/main.css'
 import '@/styles/global.scss'
 
 import { createApp } from 'vue'
