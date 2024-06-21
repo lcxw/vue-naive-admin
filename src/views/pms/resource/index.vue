@@ -31,13 +31,13 @@
           </div>
           <n-descriptions label-placement="left" bordered :column="2">
             <n-descriptions-item label="编码">
-              {{ currentMenu.code }}
+              {{ currentMenu.permissionId }}
             </n-descriptions-item>
             <n-descriptions-item label="名称">
-              {{ currentMenu.name }}
+              {{ currentMenu.title }}
             </n-descriptions-item>
             <n-descriptions-item label="路由地址">
-              {{ currentMenu.path ?? '--' }}
+              {{ currentMenu.view ?? '--' }}
             </n-descriptions-item>
             <n-descriptions-item label="组件路径">
               {{ currentMenu.component ?? '--' }}
@@ -62,7 +62,7 @@
               {{ currentMenu.keepAlive ? '是' : '否' }}
             </n-descriptions-item>
             <n-descriptions-item label="排序">
-              {{ currentMenu.order ?? '--' }}
+              {{ currentMenu.sortable ?? '--' }}
             </n-descriptions-item>
           </n-descriptions>
 
@@ -81,7 +81,7 @@
             :columns="btnsColumns"
             :scroll-x="-1"
             :get-data="api.getButtons"
-            :query-items="{ parentId: currentMenu.id }"
+            :query-items="{ parentId: currentMenu.permissionId }"
           />
         </template>
         <n-empty v-else class="h-450 f-c-c" size="large" description="请选择菜单查看详情" />
@@ -177,7 +177,7 @@ const btnsColumns = [
             size: 'small',
             type: 'error',
             style: 'margin-left: 12px;',
-            onClick: () => handleDeleteBtn(row.id),
+            onClick: () => handleDeleteBtn(row.permissionId),
           },
           {
             default: () => '删除',
