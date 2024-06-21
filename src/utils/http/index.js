@@ -13,7 +13,7 @@ import { setupInterceptors } from './interceptors'
 export function createAxios(options = {}) {
   const defaultOptions = {
     baseURL: import.meta.env.VITE_AXIOS_BASE_URL,
-    timeout: 12000,
+    timeout: 300000,
   }
   const service = axios.create({
     ...defaultOptions,

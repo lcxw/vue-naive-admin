@@ -134,7 +134,7 @@ const columns = [
         {
           size: 'small',
           rubberBand: false,
-          value: row.enable,
+          value: row.enabled,
           loading: !!row.enableLoading,
           disabled: row.code === 'SUPER_ADMIN',
           onUpdateValue: () => handleEnable(row),
@@ -160,7 +160,10 @@ const columns = [
             type: 'primary',
             secondary: true,
             onClick: () =>
-              router.push({ path: `/pms/role/user/${row.id}`, query: { roleName: row.name } }),
+              router.push({
+                path: `/pms/role/user/${row.id}`,
+                query: { roleName: row.name },
+              }),
           },
           {
             default: () => '分配用户',
@@ -204,7 +207,7 @@ const columns = [
 async function handleEnable(row) {
   row.enableLoading = true
   try {
-    await api.update({ id: row.id, enable: !row.enable })
+    await api.update({ id: row.roleId, enable: !row.enabled })
     row.enableLoading = false
     $message.success('操作成功')
     $table.value?.handleSearch()
@@ -216,5 +219,5 @@ async function handleEnable(row) {
 }
 
 const permissionTree = ref([])
-api.getAllPermissionTree().then(({ data = [] }) => (permissionTree.value = data))
+api.getAllPermissionTree().then(({ records = [] }) => (permissionTree.value = records))
 </script>

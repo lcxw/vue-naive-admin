@@ -26,9 +26,12 @@ export const usePermissionStore = defineStore('permission', {
         .sort((a, b) => a.order - b.order)
     },
     getMenuItem(item, parent) {
-      const route = this.generateRoute(item, item.show ? null : parent?.key)
-      if (item.enable && route.path && !route.path.startsWith('http'))
+      const route = this.generateRoute(item, item.show ? null : parent?.id)
+      if (item.enabled && route.path && !(route.path.startsWith('http') || route.path.startsWith('https'))) {
         this.accessRoutes.push(route)
+      }
+      if (item.enabled === false)
+        return null
       const menuItem = {
         label: route.meta.title,
         key: route.name,
@@ -46,8 +49,6 @@ export const usePermissionStore = defineStore('permission', {
         if (!menuItem.children.length)
           delete menuItem.children
       }
-      if (!item.show)
-        return null
       return menuItem
     },
     generateRoute(item, parentKey) {
@@ -55,7 +56,7 @@ export const usePermissionStore = defineStore('permission', {
       if (isExternal(item.path)) {
         originPath = item.path
         item.component = '/src/views/iframe/index.vue'
-        item.path = `/iframe/${hyphenate(item.code)}`
+        item.path = `/iframe/${hyphenate(item.code || item.code)}`
       }
       return {
         name: item.code,
@@ -71,7 +72,7 @@ export const usePermissionStore = defineStore('permission', {
           parentKey,
           btns: item.children
             ?.filter(item => item.type === 'BUTTON')
-            .map(item => ({ code: item.code, name: item.name })),
+            ?.map(item => ({ code: item.code, name: item.name })),
         },
       }
     },

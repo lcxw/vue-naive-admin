@@ -119,7 +119,7 @@ export function isUrl(path) {
  * @returns {boolean} 是否是外部链接
  */
 export function isExternal(path) {
-  return /^https?:|mailto:|tel:/.test(path)
+  return /^http:|https?:|mailto:|tel:/.test(path)
 }
 
 export const isServer = typeof window === 'undefined'

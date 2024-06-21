@@ -12,10 +12,14 @@ import { usePermissionStore, useRouterStore, useTabStore, useUserStore } from '@
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     accessToken: undefined,
+    refreshToken: undefined,
+    idToken: undefined,
   }),
   actions: {
-    setToken({ accessToken }) {
+    setToken({ accessToken, refreshToken, idToken }) {
       this.accessToken = accessToken
+      this.refreshToken = refreshToken
+      this.idToken = idToken
     },
     resetToken() {
       this.$reset()

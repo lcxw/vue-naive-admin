@@ -24,7 +24,11 @@
             <h3 class="mb-12">
               {{ currentMenu.name }}
             </h3>
-            <NButton size="small" type="primary" @click="handleEdit(currentMenu)">
+            <NButton
+              size="small"
+              type="primary"
+              @click="handleEdit(currentMenu)"
+            >
               <i class="i-material-symbols:edit-outline mr-4 text-14" />
               编辑
             </NButton>
@@ -37,10 +41,10 @@
               {{ currentMenu.name }}
             </n-descriptions-item>
             <n-descriptions-item label="路由地址">
-              {{ currentMenu.path ?? '--' }}
+              {{ currentMenu.view ?? "--" }}
             </n-descriptions-item>
             <n-descriptions-item label="组件路径">
-              {{ currentMenu.component ?? '--' }}
+              {{ currentMenu.component ?? "--" }}
             </n-descriptions-item>
             <n-descriptions-item label="菜单图标">
               <span v-if="currentMenu.icon" class="flex items-center">
@@ -50,19 +54,19 @@
               <span v-else>无</span>
             </n-descriptions-item>
             <n-descriptions-item label="layout">
-              {{ currentMenu.layout || '跟随系统' }}
+              {{ currentMenu.layout || "跟随系统" }}
             </n-descriptions-item>
             <n-descriptions-item label="是否显示">
-              {{ currentMenu.show ? '是' : '否' }}
+              {{ currentMenu.show ? "是" : "否" }}
             </n-descriptions-item>
             <n-descriptions-item label="是否启用">
-              {{ currentMenu.enable ? '是' : '否' }}
+              {{ currentMenu.enable ? "是" : "否" }}
             </n-descriptions-item>
             <n-descriptions-item label="KeepAlive">
-              {{ currentMenu.keepAlive ? '是' : '否' }}
+              {{ currentMenu.keepAlive ? "是" : "否" }}
             </n-descriptions-item>
             <n-descriptions-item label="排序">
-              {{ currentMenu.order ?? '--' }}
+              {{ currentMenu.sortable ?? "--" }}
             </n-descriptions-item>
           </n-descriptions>
 
@@ -84,7 +88,12 @@
             :query-items="{ parentId: currentMenu.id }"
           />
         </template>
-        <n-empty v-else class="h-450 f-c-c" size="large" description="请选择菜单查看详情" />
+        <n-empty
+          v-else
+          class="h-450 f-c-c"
+          size="large"
+          description="请选择菜单查看详情"
+        />
       </div>
     </div>
     <ResAddOrEdit ref="modalRef" :menus="treeData" @refresh="initData" />
@@ -102,6 +111,7 @@ const treeData = ref([])
 const treeLoading = ref(false)
 const $table = ref(null)
 const currentMenu = ref(null)
+
 async function initData(data) {
   if (data?.type === 'BUTTON') {
     $table.value.handleSearch()
@@ -115,9 +125,11 @@ async function initData(data) {
   if (data)
     currentMenu.value = data
 }
+
 initData()
 
 const modalRef = ref(null)
+
 function handleEdit(item = {}) {
   modalRef.value?.handleOpen({
     action: 'edit',
@@ -241,7 +253,7 @@ function handleDeleteBtn(id) {
 async function handleEnable(item) {
   try {
     item.enableLoading = true
-    await api.savePermission(item.id, {
+    await api.savePermission(item.id || item.id, {
       enable: !item.enable,
     })
     $message.success('操作成功')
