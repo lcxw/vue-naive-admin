@@ -77,16 +77,14 @@
           label="客户端认证方式"
           path="clientAuthenticationMethod"
           :rule="{
-            required: false,
+            required: true,
             message: '请选择客户端认证方式',
-            // trigger: ['input', 'blur'],
           }"
         >
           <n-select
             v-model:value="modalForm.clientAuthenticationMethods"
             multiple
             filterable
-            :children-field="clientAuthenticationMethods"
             label-field="value"
             value-field="clientAuthenticationMethod"
             name="clientAuthenticationMethods"
@@ -101,22 +99,20 @@
           label="授权方式"
           path="authorizationGrantTypes"
           :rule="{
-            required: false,
+            required: true,
             message: '请选授权方式',
-            trigger: ['input', 'blur'],
           }"
         >
           <n-select
             v-model:value="modalForm.authorizationGrantTypes"
             multiple
-            filterabl
+            filterable
             label-field="value"
             value-field="grantTypeName"
             placeholder="选择授权方式"
             name="authorizationGrantTypes"
             trigger="click"
             :options="authorizationGrantTypes"
-            @select="handleSelect"
           >
             <NButton>请选授权方式</NButton>
           </n-select>
@@ -125,15 +121,16 @@
           <n-dynamic-input
             v-model:value="modalForm.scopes"
             :default-value="['profile', 'openid', 'email', 'phone']"
-            placeholder="请输入授权范围，多个用英文逗号隔开"
+            placeholder="请输入授权范   围，多个用英文逗号隔开"
             :min="1"
             :max="10"
             #="{ index }"
           >
             <n-input
               :key="index"
-              v-model:value="modalForm.scopes[index].scope"
-              :placeholder="`请选择${modalForm.scopes[index]}`"
+              v-model:value="modalForm.scopes"
+              :value="modalForm.scopes"
+              :placeholder="`请选择${modalForm.scopes}`"
             />
           </n-dynamic-input>
         </n-form-item>
@@ -141,13 +138,14 @@
         <n-form-item label="重定向地址" path="redirectUri">
           <n-dynamic-input
             v-model:value="modalForm.redirectUris"
+            :value="modalForm.redirectUris"
             placeholder="请输入重定向uri，多个用英文逗号隔开"
             #="{ index }"
           >
             <n-input
               :key="index"
-              v-model:value="modalForm.redirectUris[index].redirectUri"
-              :placeholder="`请选择${modalForm.redirectUris[index].redirectUri}`"
+              v-model:value="modalForm.redirectUris"
+              :placeholder="`请选择${modalForm.redirectUris}`"
             />
           </n-dynamic-input>
         </n-form-item>
@@ -446,8 +444,7 @@ const columns = [
             type: 'primary',
             style: 'margin-left: 12px;',
             disabled: row.code === 'SUPER_ADMIN',
-            onClick: () => handleEditClient({ row, onOk: onSave }),
-
+            onClick: () => handleEditClient(row),
           },
           {
             default: () => '编辑',
@@ -494,9 +491,9 @@ const currentClient = reactive({})
 function handleAddClient(row) {
   currentClient.value = {
     id: null,
-    clientId: modalForm.clientName || null,
-    clientSecret: modalForm.clientSecret || null,
-    clientName: modalForm.clientName || null,
+    clientId: null,
+    clientSecret: null,
+    clientName: null,
     clientAuthenticationMethods: [],
     authorizationGrantTypes: [],
     scopes: [],
@@ -518,19 +515,25 @@ function handleAddClient(row) {
 }
 
 function handleEditClient(row) {
-  $message.info(`row=${row.id}`)
   api.getDetails(row.id).then((result) => {
-    const res = result
+    const res = {}
     res.id = result.clientId || ''
     res.clientId = result.clientId || ''
     res.clientName = result.clientName || ''
     res.clientSecret = result.clientSecret || ''
-    res.clientAuthenticationMethods = result.clientAuthenticationMethods?.map(e => e.clientAuthenticationMethod) || []
-    res.authorizationGrantTypes = result.authorizationGrantTypes?.map(e => e.GrantTypeName) || []
+    res.clientAuthenticationMethods
+      = result.clientAuthenticationMethods?.map(
+        e => e.clientAuthenticationMethod,
+      ) || []
+    res.authorizationGrantTypes
+      = result.authorizationGrantTypes?.map(
+        e => e.grantTypeName,
+      ) || []
     res.scopes = result.scopes?.map(e => e.scope) || []
     res.redirectUris = result.redirectUrls?.map(e => e.redirectUri) || []
     res.requireProofKey = result.requireProofKey || true
-    res.requireAuthorizationConsent = result.requireAuthorizationConsent || true
+    res.requireAuthorizationConsent
+      = result.requireAuthorizationConsent || true
     res.jwkSetUrl = result.jwkSetUrl || null
     res.signingAlgorithm = result.signingAlgorithm || 'RS256'
     res.tokenFormat = result.tokenFormat || 'self-contained'
@@ -538,11 +541,9 @@ function handleEditClient(row) {
     res.idTokenSignatureAlgorithm = result.idTokenSignatureAlgorithm || 'RS512'
     res.accessTokenTimeToLive = result.accessTokenTimeToLive || '30'
     res.refreshTokenTimeToLive = result.refreshTokenTimeToLive || '480'
-    currentClient.value = res
-    modalForm.value = currentClient
-  },
-  )
-  modalForm.value = currentClient
+    // currentClient.value = res;
+    modalForm.value = res
+  })
   handleAdd(row)
   // api.create(currentClient)
 }
