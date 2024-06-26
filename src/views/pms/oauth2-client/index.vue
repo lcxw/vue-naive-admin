@@ -74,6 +74,7 @@
           </n-radio-group>
         </n-form-item>
         <n-form-item
+          v-model:value="modalForm.clientAuthenticationMethods"
           label="客户端认证方式"
           path="clientAuthenticationMethod"
           :rule="{
@@ -83,8 +84,8 @@
         >
           <n-select
             v-model:value="modalForm.clientAuthenticationMethods"
-            multiple
-            filterable
+
+            filterable multiple
             label-field="value"
             value-field="clientAuthenticationMethod"
             name="clientAuthenticationMethods"
@@ -384,12 +385,7 @@ const {
   modalRef,
   modalFormRef,
   modalForm,
-  modalAction,
-  handleSave,
   handleAdd,
-  handleOpen,
-  handleView,
-  handleEdit,
   handleDelete,
 } = useCrud({
   name: '客户端',
@@ -548,15 +544,15 @@ function handleEditClient(row) {
   // api.create(currentClient)
 }
 
-function onSave() {
-  if (modalAction.value === 'setRole') {
-    return handleSave({
-      api: () => api.update(modalForm.value),
-      cb: () => $message.success('分配成功'),
-    })
-  }
-  handleSave()
-}
+// function onSave() {
+//   if (modalAction.value === 'setRole') {
+//     return handleSave({
+//       api: () => api.update(modalForm.value),
+//       cb: () => $message.success('分配成功'),
+//     })
+//   }
+//   handleSave()
+// }
 </script>
 
 <style scoped></style>
