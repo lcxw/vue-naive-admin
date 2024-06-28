@@ -78,14 +78,14 @@
           label="客户端认证方式"
           path="clientAuthenticationMethod"
           :rule="{
-            required: true,
+            required: false,
             message: '请选择客户端认证方式',
           }"
         >
           <n-select
             v-model:value="modalForm.clientAuthenticationMethods"
-
-            filterable multiple
+            filterable
+            multiple
             label-field="value"
             value-field="clientAuthenticationMethod"
             name="clientAuthenticationMethods"
@@ -100,7 +100,7 @@
           label="授权方式"
           path="authorizationGrantTypes"
           :rule="{
-            required: true,
+            required: false,
             message: '请选授权方式',
           }"
         >
@@ -119,36 +119,27 @@
           </n-select>
         </n-form-item>
         <n-form-item label="授权范围">
-          <n-dynamic-input
+          <n-select
             v-model:value="modalForm.scopes"
-            :default-value="['profile', 'openid', 'email', 'phone']"
-            placeholder="请输入授权范   围，多个用英文逗号隔开"
+            multiple
+            filterable
+            label-field="label"
+            value-field="scope"
+            placeholder="选择授权范围"
+            name="scopes"
+            trigger="click"
+            :options="scopes"
             :min="1"
             :max="10"
-            #="{ index }"
-          >
-            <n-input
-              :key="index"
-              v-model:value="modalForm.scopes"
-              :value="modalForm.scopes"
-              :placeholder="`请选择${modalForm.scopes}`"
-            />
-          </n-dynamic-input>
+          />
+          <NButton>请选授权范围</NButton>
         </n-form-item>
 
         <n-form-item label="重定向地址" path="redirectUri">
           <n-dynamic-input
             v-model:value="modalForm.redirectUris"
-            :value="modalForm.redirectUris"
             placeholder="请输入重定向uri，多个用英文逗号隔开"
-            #="{ index }"
-          >
-            <n-input
-              :key="index"
-              v-model:value="modalForm.redirectUris"
-              :placeholder="`请选择${modalForm.redirectUris}`"
-            />
-          </n-dynamic-input>
+          />
         </n-form-item>
         <n-form-item
           label="是否需要用户同意"
@@ -377,17 +368,31 @@ const authorizationGrantTypes = reactive([
     grantTypeName: 'urn:ietf:params:oauth:grant-type:device_code',
   },
 ])
+
+const scopes = reactive([
+  {
+    label: 'openId',
+    scope: 'openId',
+  },
+  {
+    label: 'profile',
+    scope: 'profile',
+  },
+  {
+    label: 'email',
+    scope: 'email',
+  },
+  {
+    label: 'phone',
+    scope: 'phone',
+  },
+])
+
 onMounted(() => {
   $table.value?.handleSearch()
 })
 
-const {
-  modalRef,
-  modalFormRef,
-  modalForm,
-  handleAdd,
-  handleDelete,
-} = useCrud({
+const { modalRef, modalFormRef, modalForm, handleAdd, handleEdit, handleDelete } = useCrud({
   name: '客户端',
   doCreate: api.create,
   doDelete: api.delete,
@@ -522,11 +527,9 @@ function handleEditClient(row) {
         e => e.clientAuthenticationMethod,
       ) || []
     res.authorizationGrantTypes
-      = result.authorizationGrantTypes?.map(
-        e => e.grantTypeName,
-      ) || []
+      = result.authorizationGrantTypes?.map(e => e.grantTypeName) || []
     res.scopes = result.scopes?.map(e => e.scope) || []
-    res.redirectUris = result.redirectUrls?.map(e => e.redirectUri) || []
+    res.redirectUris = result.redirectUris?.map(e => e.redirectUri) || []
     res.requireProofKey = result.requireProofKey || true
     res.requireAuthorizationConsent
       = result.requireAuthorizationConsent || true
@@ -540,7 +543,7 @@ function handleEditClient(row) {
     // currentClient.value = res;
     modalForm.value = res
   })
-  handleAdd(row)
+  handleEdit(row)
   // api.create(currentClient)
 }
 
