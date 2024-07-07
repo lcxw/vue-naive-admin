@@ -43,42 +43,52 @@ export function setupInterceptors(axiosInstance) {
       const needTip = config?.needTip !== false
 
       // 根据code处理对应的操作，并返回处理后的message
-      const message = resolveResError(code, data?.message ?? data?.msg ?? statusText, needTip)
-      // 需要错误提醒
-      !config?.noNeedTip && message && window.$message?.error(message)
+      const message = resolveResError(
+        code,
+        data?.message ?? data?.msg ?? statusText,
+        needTip,
+      )
       if (!(code === 200)) {
-        console.warn(
+        $message.warn(
           `error while getting result from ${axiosInstance.url} with code: ${code} ,message: ${message}`,
         )
         return Promise.reject({ code, message, error: data ?? response })
       }
       else {
-        console.warn(
+        $message.warn(
           `error while getting result with json ${
             axiosInstance.url
           } with code: ${code} ,message: ${JSON.stringify(message)},data: ${JSON.stringify(data)}`,
         )
         return Promise.resolve(data ?? response)
       }
-
-  }
-
-  function resReject(error) {
-    if (!error || !error.response) {
-      const code = error?.code || error.response.status
-      /** 根据code处理对应的操作，并返回处理后的message */
-      const message = resolveResError(code, error.message)
-      return Promise.reject({ code, message, error })
     }
 
-    const { data, status, config } = error.response
-    const code = data?.code ?? status
+  async  function resReject(error) {
+      if (!error || !error.response) {
+        const code = error?.code || error.response.status
+        /** 根据code处理对应的操作，并返回处理后的message */
+        const message = resolveResError(code, error.message)
+        return Promise.reject({ code, message, error })
+      }
 
-    const needTip = config?.needTip !== false
-    const message = resolveResError(code, data?.message ?? error.message, needTip)
-    return Promise.reject({ code, message, error: error.response?.data || error.response })
+      const { data, status, config } = error.response
+      const code = data?.code ?? status
+
+      const needTip = config?.needTip !== false
+      const message = resolveResError(
+        code,
+        data?.message ?? error.message,
+        needTip,
+      )
+      return Promise.reject({
+        code,
+        message,
+        error: error.response?.data || error.response,
+      })
+    }
+
+    axiosInstance.interceptors.request.use(reqResolve, reqReject)
+    axiosInstance.interceptors.response.use(resResolve, resReject)
   }
-
-  axiosInstance.interceptors.request.use(reqResolve, reqReject)
-  axiosInstance.interceptors.response.use(resResolve, resReject)
 }

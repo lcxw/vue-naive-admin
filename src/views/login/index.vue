@@ -155,7 +155,11 @@ async function handleLogin(isQuick) {
   try {
     loading.value = true
     $message.loading('正在验证，请稍后...', { key: 'login' })
-    const { data } = await api.login({ username, password: password.toString(), captcha, isQuick })
+    const formData = new FormData()
+    formData.append('username', username)
+    formData.append('password', password)
+    formData.append('captcha', captcha)
+    const { data } = await api.login(formData)
     if (isRemember.value) {
       lStorage.set('loginInfo', { username, password })
     }
@@ -177,6 +181,7 @@ async function handleLogin(isQuick) {
 }
 
 async function onLoginSuccess(data = {}) {
+  // todo do redirect to oauth2 login url
   authStore.setToken(data)
   $message.loading('登录中...', { key: 'login' })
   try {
