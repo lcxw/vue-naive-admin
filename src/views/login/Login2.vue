@@ -1,4 +1,5 @@
 <script setup lang="js">
+import {handleOAuth2Login} from "@/utils/auth.js";
 import { createDiscreteApi } from 'naive-ui'
 import { ref } from 'vue'
 import api from './api'
@@ -464,6 +465,7 @@ getCaptcha()
               {{ showThirdLogin ? "其它登录方式" : "使用app扫描二维码登录" }}
             </n-divider>
             <div v-if="showThirdLogin" class="other_login_icon">
+              <n-button @click="handleOAuth2Login()">快速登录</n-button>
               <IconGitee
                 :size="32"
                 class="icon_item"
