@@ -1,8 +1,8 @@
 <script setup lang="js">
-import {handleOAuth2Login} from "@/utils/auth.js";
 import { createDiscreteApi } from 'naive-ui'
 import { ref } from 'vue'
 import api from './api'
+import { handleOAuth2Login } from '@/utils/auth.js'
 import { router } from '@/router/index.js'
 import IconGitee from '@/components/icons/IconGitee.vue'
 import HelloWorld from '@/components/common/HelloWorld.vue'
@@ -15,9 +15,9 @@ const loading = ref(false)
 
 // 定义登录提交的对象
 const loginModel = ref({
-  code: '',
+  code: '666999',
   username: 'admin',
-  password: '123456',
+  password: 'admin',
   loginType: '',
   captchaId: '',
 })
@@ -213,11 +213,11 @@ function handleUpdateValue(name) {
     if (name === 'signup') {
       // 短信认证登录时
       loginModel.value.username = '15683762137'
-      loginModel.value.password = ''
+      loginModel.value.password = '666999'
     }
     else {
       loginModel.value.username = 'admin'
-      loginModel.value.password = '123456'
+      loginModel.value.password = 'admin'
     }
   }
 }
@@ -465,7 +465,9 @@ getCaptcha()
               {{ showThirdLogin ? "其它登录方式" : "使用app扫描二维码登录" }}
             </n-divider>
             <div v-if="showThirdLogin" class="other_login_icon">
-              <n-button @click="handleOAuth2Login()">快速登录</n-button>
+              <n-button @click="handleOAuth2Login()">
+                快速登录
+              </n-button>
               <IconGitee
                 :size="32"
                 class="icon_item"
