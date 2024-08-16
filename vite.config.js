@@ -58,10 +58,17 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           rewrite: path => path.replace(/^\/api\/oidc-server/, ''),
           secure: false,
+          ws: true, // 如果需要 websocket 支持
+          // 以下配置确保 cookie 被传递
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Credentials': 'true',
+          },
           configure: (proxy, options) => {
             // 配置此项可在响应头中看到请求的真实地址
             proxy.on('proxyRes', (proxyRes, req) => {
-              proxyRes.headers['x-real-url'] = new URL(req.url || '', options.target)?.href || ''
+              proxyRes.headers['x-real-url']
+                = new URL(req.url || '', options.target)?.href || ''
             })
           },
         },
@@ -73,7 +80,8 @@ export default defineConfig(({ mode }) => {
           configure: (proxy, options) => {
             // 配置此项可在响应头中看到请求的真实地址
             proxy.on('proxyRes', (proxyRes, req) => {
-              proxyRes.headers['x-real-url'] = new URL(req.url || '', options.target)?.href || ''
+              proxyRes.headers['x-real-url']
+                = new URL(req.url || '', options.target)?.href || ''
             })
           },
         },
