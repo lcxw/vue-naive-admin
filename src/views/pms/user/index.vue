@@ -122,6 +122,7 @@
 
 <script setup>
 import { NAvatar, NButton, NSwitch, NTag } from 'naive-ui'
+import role from '../role/api.js'
 import api from './api'
 import { formatDateTime } from '@/utils'
 import { MeCrud, MeModal, MeQueryItem } from '@/components'
@@ -142,7 +143,7 @@ const genders = [
   { label: '女', value: 2 },
 ]
 const roles = ref([])
-api.getAllRoles().then(({ data = [] }) => (roles.value = data.records))
+roles.value = [{ roleId: '2', roleName: 'basic', roleContent: '基础用户角色', description: '基础用户角色，提供基本的系统权限', enabled: true, createTime: null, createId: null, updateTime: null, updateId: null, permissions: [] }]
 
 const {
   modalRef,
@@ -296,7 +297,7 @@ async function handleEnable(row) {
 }
 
 function handleOpenRolesSet(row) {
-  const roleIds = row.roles?.map(item => item.roleIds) || []
+  const roleIds = row.roles?.map(item => item.roleId) || [{ roleId: '2', roleName: 'basic', roleContent: '基础用户角色', description: '基础用户角色，提供基本的系统权限', enabled: true, createTime: null, createId: null, updateTime: null, updateId: null, permissions: [] }].map(item => item.roleId)
   handleOpen({
     action: 'setRole',
     title: '分配角色',
