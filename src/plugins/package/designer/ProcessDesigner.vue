@@ -87,27 +87,27 @@
 </template>
 
 <script>
+// 模拟流转流程
+import tokenSimulation from "bpmn-js-token-simulation";
 // 生产环境时优化
 // const BpmnModeler = window.BpmnJS;
 import BpmnModeler from "bpmn-js/lib/Modeler";
+// 引入json转换与高亮
+import convert from "xml-js";
 import DefaultEmptyXML from "./plugins/defaultEmpty";
-// 翻译方法
-import customTranslate from "./plugins/translate/customTranslate";
-import translationsCN from "./plugins/translate/zh";
-// 模拟流转流程
-import tokenSimulation from "bpmn-js-token-simulation";
+import activitiModdleDescriptor from "./plugins/descriptor/activitiDescriptor.json";
 // 标签解析构建器
 // import bpmnPropertiesProvider from "bpmn-js-properties-panel/lib/provider/bpmn";
 // 标签解析 Moddle
 import camundaModdleDescriptor from "./plugins/descriptor/camundaDescriptor.json";
-import activitiModdleDescriptor from "./plugins/descriptor/activitiDescriptor.json";
 import flowableModdleDescriptor from "./plugins/descriptor/flowableDescriptor.json";
+import activitiModdleExtension from "./plugins/extension-moddle/activiti";
 // 标签解析 Extension
 import camundaModdleExtension from "./plugins/extension-moddle/camunda";
-import activitiModdleExtension from "./plugins/extension-moddle/activiti";
 import flowableModdleExtension from "./plugins/extension-moddle/flowable";
-// 引入json转换与高亮
-import convert from "xml-js";
+// 翻译方法
+import customTranslate from "./plugins/translate/customTranslate";
+import translationsCN from "./plugins/translate/zh";
 
 export default {
   name: "BpmnProcessDesigner",

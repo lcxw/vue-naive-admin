@@ -16,7 +16,7 @@
           v-model="queryParams.dictLabel"
           placeholder="请输入字典标签"
           clearable
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="状态" prop="status">
@@ -190,8 +190,8 @@
 </template>
 
 <script>
-import { listData, getData, delData, addData, updateData } from "@/api/system/dict/data";
-import { optionselect as getDictOptionselect, getType } from "@/api/system/dict/type";
+import { addData, delData, getData, listData, updateData } from "@/api/system/dict/data";
+import { getType, optionselect as getDictOptionselect } from "@/api/system/dict/type";
 
 export default {
   name: "Data",

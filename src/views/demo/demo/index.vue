@@ -7,7 +7,7 @@
           placeholder="请输入key键"
           clearable
           size="small"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="值" prop="value">
@@ -16,7 +16,7 @@
           placeholder="请输入值"
           clearable
           size="small"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="创建时间">
@@ -201,8 +201,8 @@
 </template>
 
 <script>
-import { listDemo, pageDemo, getDemo, delDemo, addDemo, updateDemo } from "@/api/demo/demo";
-import {getToken} from "@/utils/auth";
+import { addDemo, delDemo, getDemo, listDemo, pageDemo, updateDemo } from "@/api/demo/demo";
+import { getToken } from "@/utils/auth";
 
 export default {
   name: "Demo",

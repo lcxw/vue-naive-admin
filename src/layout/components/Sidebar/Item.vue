@@ -5,29 +5,39 @@ export default {
   props: {
     icon: {
       type: String,
-      default: ''
+      default: ""
     },
     title: {
       type: String,
-      default: ''
-    }
+      default: ""
+    },
   },
   render(h, context) {
     const { icon, title } = context.props
     const vnodes = []
 
     if (icon) {
-      vnodes.push(<svg-icon icon-class={icon}/>)
+      vnodes.push(h("svg-icon", {
+        props: {
+          iconClass: icon
+        }
+      }));
     }
 
     if (title) {
       if (title.length > 5) {
-        vnodes.push(<span slot='title' title={(title)}>{(title)}</span>)
+        vnodes.push(h("span", {
+          slot: "title",
+          title
+        }, title));
       } else {
-        vnodes.push(<span slot='title'>{(title)}</span>)
+        // 把下面的jsx写法换成render函数写法或者普通vue写法
+        vnodes.push(h("span", {
+          slot: "title"
+        }, title));
       }
     }
     return vnodes
-  }
+  },
 }
 </script>

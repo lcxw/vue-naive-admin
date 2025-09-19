@@ -1,6 +1,6 @@
-"use strict";
+import CamundaModdleExtension from './extension.js'
 
-module.exports = {
-  __init__: ["camundaModdleExtension"],
-  camundaModdleExtension: ["type", require("./extension")]
-};
+export default {
+  __init__: ['camundaModdleExtension'],
+  ActivitiModdleExtension: ['type', CamundaModdleExtension],
+}

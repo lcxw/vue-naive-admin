@@ -6,7 +6,7 @@
           v-model="queryParams.noticeTitle"
           placeholder="请输入公告标题"
           clearable
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="操作人员" prop="createBy">
@@ -14,7 +14,7 @@
           v-model="queryParams.createBy"
           placeholder="请输入操作人员"
           clearable
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="类型" prop="noticeType">
@@ -170,7 +170,7 @@
 </template>
 
 <script>
-import { listNotice, getNotice, delNotice, addNotice, updateNotice } from "@/api/system/notice";
+import { addNotice, delNotice, getNotice, listNotice, updateNotice } from "@/api/system/notice";
 
 export default {
   name: "Notice",

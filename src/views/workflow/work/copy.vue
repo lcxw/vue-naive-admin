@@ -6,7 +6,7 @@
           v-model="queryParams.processName"
           placeholder="请输入流程名称"
           clearable
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="发起人" prop="originatorName">
@@ -14,7 +14,7 @@
           v-model="queryParams.originatorName"
           placeholder="请输入发起人"
           clearable
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item>
@@ -72,7 +72,7 @@
 </template>
 
 <script>
-import { listCopyProcess } from "@/api/workflow/process"
+import { listCopyProcess } from "@/api/workflow/process";
 
 export default {
   name: "Copy",

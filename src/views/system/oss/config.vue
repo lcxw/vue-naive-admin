@@ -7,7 +7,7 @@
           placeholder="配置key"
           clearable
           size="small"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="桶名称" prop="bucketName">
@@ -16,7 +16,7 @@
           placeholder="请输入桶名称"
           clearable
           size="small"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="是否默认" prop="status">
@@ -179,12 +179,12 @@
 <script>
 
 import {
-  listOssConfig,
-  getOssConfig,
-  delOssConfig,
   addOssConfig,
-  updateOssConfig,
-  changeOssConfigStatus
+  changeOssConfigStatus,
+  delOssConfig,
+  getOssConfig,
+  listOssConfig,
+  updateOssConfig
 } from "@/api/system/ossConfig";
 
 export default {

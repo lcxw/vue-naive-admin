@@ -7,7 +7,7 @@
           placeholder="请输入流程名称"
           clearable
           size="small"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="审批时间">
@@ -87,7 +87,7 @@
 </template>
 
 <script>
-import { listFinishedProcess } from '@/api/workflow/process';
+import { listFinishedProcess } from "@/api/workflow/process";
 import { revokeProcess } from "@/api/workflow/finished";
 
 export default {

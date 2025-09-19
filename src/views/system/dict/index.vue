@@ -7,7 +7,7 @@
           placeholder="请输入字典名称"
           clearable
           style="width: 240px"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="字典类型" prop="dictType">
@@ -16,7 +16,7 @@
           placeholder="请输入字典类型"
           clearable
           style="width: 240px"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="状态" prop="status">
@@ -189,7 +189,7 @@
 </template>
 
 <script>
-import { listType, getType, delType, addType, updateType, refreshCache } from "@/api/system/dict/type";
+import { addType, delType, getType, listType, refreshCache, updateType } from "@/api/system/dict/type";
 
 export default {
   name: "Dict",

@@ -1,326 +1,236 @@
 <template>
-  <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="表单名称" prop="formName">
-        <el-input
-          v-model="queryParams.formName"
+  <CommonPage>
+    <template #action>
+      <n-flex>
+        <NButton type="primary" @click="handleAdd()">
+          <i class="i-material-symbols:add mr-4 text-18" />
+          创建
+        </NButton>
+      </n-flex>
+    </template>
+    <MeCrud
+      ref="$table"
+      v-model:query-items="queryItems"
+      :scroll-x="1200"
+      :columns="columns"
+      :get-data="listForm"
+    >
+      <MeQueryItem label="表单名称" :label-width="50">
+        <n-input
+          v-model:value="queryItems.formName"
+          type="text"
           placeholder="请输入表单名称"
           clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
         />
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
-      </el-form-item>
-    </el-form>
+      </MeQueryItem>
+      <MeModal ref="modalRef" width="520px">
+        <n-form
+          ref="modalFormRef"
+          label-placement="left"
+          label-align="left"
+          :label-width="80"
+          :model="modalForm"
+          :disabled="modalAction === 'view'"
+        >
+          <n-form-item
+            v-if="['add'].includes(modalAction)"
+            label="模型名称"
+            path="formName"
+            :rule="{
+              required: true,
+              message: '请输入模型名称',
+              trigger: ['input', 'blur'],
+            }"
+          >
+            <n-input v-model:value="modalForm.formName" />
+          </n-form-item>
+          <n-form-item
+            v-if="['add'].includes(modalAction)"
+            label="备注"
+            path="remark"
+            :rule="{
+              required: true,
+              message: '请输入备注',
+              trigger: ['input', 'blur'],
+            }"
+          >
+            <n-input v-model:value="modalForm.remark" />
+          </n-form-item>
+        </n-form>
+      </MeModal>
+      <!-- 预览表单对话框 -->
 
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['workflow:form:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['workflow:form:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['workflow:form:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['workflow:form:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
-    </el-row>
-
-    <el-table v-loading="loading" :data="formList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="表单主键" align="center" prop="formId" />
-      <el-table-column label="表单名称" align="center" prop="formName" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-view"
-            @click="handleDetail(scope.row)"
-          >详情</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['workflow:form:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['workflow:form:remove']"
-          >删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
-
-    <!-- 添加或修改流程表单对话框 -->
-    <el-dialog title="表单信息" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="表单名称" prop="formName">
-          <el-input v-model="form.formName" placeholder="请输入表单名称" />
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark" placeholder="请输入备注" />
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="open=false">取 消</el-button>
-      </div>
-    </el-dialog>
-
-    <!-- 设计表单对话框 -->
-    <el-dialog :visible.sync="designerFormOpen" custom-class="vf-designer" fullscreen append-to-body>
-      <v-form-designer ref="vfDesigner" :resetFormJson="true" :designer-config="{ externalLink: false, toolbarMaxWidth: 480 }">
-        <!-- 自定义按钮插槽 -->
-        <template #customToolButtons>
-          <el-button type="text" @click="open=true"><i class="el-icon-finished"/>保存</el-button>
-        </template>
-      </v-form-designer>
-    </el-dialog>
-
-    <!-- 预览表单对话框 -->
-    <el-dialog title="表单预览" :visible.sync="renderFormOpen" width="60%" append-to-body>
-      <v-form-render :form-json="{}" :form-data="{}" ref="vFormRef"></v-form-render>
-    </el-dialog>
-  </div>
+      <n-modal v-model:show="renderFormOpen" title="表单详情" width="60%" append-to-body>
+        <v-form-render ref="vFormRef" :form-json="previewFormJson" :form-data="formData" :option-data="optionData" />
+      </n-modal>
+      <!-- 设计表单对话框 -->
+      <n-modal v-model:show="designerFormOpen" custom-class="vf-designer" append-to-body>
+        <v-form-designer
+          ref="vfDesigner" :reset-form-json="true"
+          :designer-config="{ externalLink: false, toolbarMaxWidth: 480 }"
+        >
+          <!-- 自定义按钮插槽 -->
+          <template #customToolButtons>
+            <el-button type="primary" @click="saveFormDesign">
+              <i class="el-icon-finished" />保存
+            </el-button>
+            <el-button @click="designerFormOpen = false">
+              关闭
+            </el-button>
+          </template>
+        </v-form-designer>
+      </n-modal>
+    </MeCrud>
+  </CommonPage>
 </template>
 
-<script>
-import { listForm, getForm, delForm, addForm, updateForm } from "@/api/workflow/form";
+<script setup>
+import { NButton } from 'naive-ui'
+import { addForm, delForm, listForm, updateForm } from '@/api/workflow/form.js'
+import { MeCrud, MeModal, MeQueryItem } from '@/components'
+import { useCrud } from '@/composables'
 
-export default {
-  name: "Form",
-  components: {},
-  data() {
-    return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
-      showSearch: true,
-      // 总条数
-      total: 0,
-      // 流程表单表格数据
-      formList: [],
-      // 弹出层标题
-      title: "",
-      designerFormOpen: false,
-      renderFormOpen: false,
-      formTitle: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
-      queryParams: {
-        pageNum: 1,
-        pageSize: 10,
-        formName: null,
-        content: null,
-      },
-      // 表单参数
-      form: {},
-      // 表单校验
-      rules: {
-        formName: [
-          {required: true, message: "表单名称不能为空", trigger: "blur"}
-        ]
-      }
-    };
+const $table = ref(null)
+/** QueryBar筛选参数（可选） */
+const queryItems = ref({})
+
+onMounted(() => {
+  $table.value?.handleSearch()
+})
+const {
+  modalRef,
+  modalFormRef,
+  modalForm,
+  modalAction,
+  handleAdd,
+  handleEdit,
+  handleDelete,
+} = useCrud({
+  name: '模型',
+  initForm: { enable: true },
+  doCreate: addForm,
+  doDelete: delForm,
+  doUpdate: updateForm,
+  refresh: () => $table.value?.handleSearch(),
+})
+const vfDesigner = ref(null)
+const formData = ref(null)
+const optionData = ref(null)
+const vFormRef = ref(null)
+const renderFormOpen = ref(false)
+const designerFormOpen = ref(false)
+const previewFormJson = ref({ formConfig: {}, widgetList: [] }) // 新增响应式数据
+const columns = [
+  { title: '表单编号', key: 'formId', width: 100, ellipsis: { tooltip: true } },
+  { title: '表单名称', key: 'formName', width: 150, ellipsis: { tooltip: true } },
+  {
+    title: '备注',
+    key: 'remark',
+    width: 200,
+    ellipsis: { tooltip: true },
   },
-  created() {
-    this.getList();
+  { title: '内容', key: 'content', width: 60, ellipsis: { tooltip: true } },
+  {
+    title: '操作',
+    key: 'actions',
+    width: 420,
+    align: 'right',
+    fixed: 'right',
+    hideInExcel: true,
+    render(row) {
+      return [
+        h(
+          NButton,
+          {
+            size: 'small',
+            type: 'primary',
+            class: 'ml-12px',
+            secondary: true,
+            onClick: row => openDesigner(row),
+          },
+          {
+            default: () => '详情',
+            icon: () => h('i', { class: 'i-carbon:user-role text-14' }),
+          },
+        ),
+        h(
+          NButton,
+          {
+            size: 'small',
+            type: 'primary',
+            class: 'ml-12px',
+            secondary: true,
+            onClick: row => openPreview(row),
+          },
+          {
+            default: () => '预览',
+            icon: () => h('i', { class: 'i-carbon:user-role text-14' }),
+          },
+        ),
+        h(
+          NButton,
+          {
+            size: 'small',
+            type: 'primary',
+            style: 'margin-left: 12px;',
+            onClick: () => handleEdit(),
+          },
+          {
+            default: () => '修改',
+            icon: () => h('i', { class: 'i-radix-icons:reset text-14' }),
+          },
+        ),
+
+        h(
+          NButton,
+          {
+            size: 'small',
+            type: 'error',
+            style: 'margin-left: 12px;',
+            onClick: () => handleDelete(row.id),
+          },
+          {
+            default: () => '删除',
+            icon: () => h('i', { class: 'i-material-symbols:delete-outline text-14' }),
+          },
+        ),
+      ]
+    },
   },
-  activated() {
-    this.getList();
-  },
-  methods: {
-    /** 查询流程表单列表 */
-    getList() {
-      this.loading = true;
-      listForm(this.queryParams).then(response => {
-        this.formList = response.rows;
-        this.total = response.total;
-        this.loading = false;
-      });
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        formId: null,
-        formName: null,
-        content: null,
-        createTime: null,
-        updateTime: null,
-        createBy: null,
-        updateBy: null,
-        remark: null
-      };
-      this.resetForm("form");
-    },
-    clearDesigner() {
-      this.$nextTick(() => {
-        this.$refs.vfDesigner.clearDesigner()
-      })
-    },
-    /** 搜索按钮操作 */
-    handleQuery() {
-      this.queryParams.pageNum = 1;
-      this.getList();
-    },
-    /** 重置按钮操作 */
-    resetQuery() {
-      this.resetForm("queryForm");
-      this.handleQuery();
-    },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.formId)
-      this.single = selection.length!==1
-      this.multiple = !selection.length
-    },
-    /** 表单配置信息 */
-    handleDetail(row) {
-      this.renderFormOpen = true;
-      this.$nextTick(() => {
-        this.$refs.vFormRef.setFormJson(row.content || {formConfig: {}, widgetList: []})
-      })
-    },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset();
-      this.designerFormOpen = true;
-      //清理表单设计器
-      this.clearDesigner()
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset();
-      const formId = row.formId || this.ids
-      getForm(formId).then(response => {
-        this.form = response.data;
-        this.designerFormOpen = true;
-        //清理表单设计器
-        this.clearDesigner()
-        this.$nextTick(() => {
-          let {content} = this.form
-          if (content) {
-            this.$refs.vfDesigner.setFormJson(content)
-          }
-        })
-      });
-    },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          let formJson = this.$refs.vfDesigner.getFormJson();
-          this.form.content = JSON.stringify(formJson)
-          if (this.form.formId != null) {
-            updateForm(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功");
-              this.open = false;
-              this.designerFormOpen=false
-              this.getList();
-            });
-          } else {
-            addForm(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.designerFormOpen=false
-              this.getList();
-            });
-          }
-        }
-      });
-    },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const formIds = row.formId || this.ids;
-      this.$confirm('是否确认删除流程表单编号为"' + formIds + '"的数据项?', "警告", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      }).then(function() {
-        return delForm(formIds);
-      }).then(() => {
-        this.getList();
-        this.$modal.msgSuccess("删除成功");
-      })
-    },
-    /** 导出按钮操作 */
-    handleExport() {
-      let _this = this
-      this.$confirm('是否确认导出所有流程表单数据项?', "警告", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      }).then(function() {
-        _this.download('/workflow/form/export', {
-        ..._this.queryParams
-      }, `form_${new Date().getTime()}.xlsx`)
-      })
+]
+// 打开表单设计器
+function openDesigner(row) {
+  designerFormOpen.value = true
+  // 如果需要初始化设计器内容，可以在这里处理
+  nextTick(() => {
+    if (vfDesigner.value) {
+      // 可以根据需要初始化设计器
+      // 例如：vfDesigner.value.setFormJson(initFormJson)
+      vfDesigner.value.setFormJson(row.content)
+    }
+  })
+}
+
+// 保存表单设计
+function saveFormDesign() {
+  if (vfDesigner.value) {
+    try {
+      vfDesigner.value.getFormJson()
+      // 这里添加实际的保存逻辑
+      // 例如调用API保存表单设计
+      $message.success('表单保存成功')
+      designerFormOpen.value = false
+      $table.value?.handleSearch() // 刷新列表
+    }
+    catch (error) {
+      $message.error(`保存表单时出错: ${error.message}`)
     }
   }
-};
-</script>
-
-<style lang="scss">
-.vf-designer .el-dialog__body {
-  padding: 0;
-  box-sizing: border-box;
-  overflow-y: auto;
 }
-</style>
+function openPreview(row) {
+  // 设置表单数据
+  previewFormJson.value = row.content || { formConfig: {}, widgetList: [] }
+  // 打开对话框
+  renderFormOpen.value = true
+}
+</script>

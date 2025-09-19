@@ -7,7 +7,7 @@
           placeholder="请输入参数名称"
           clearable
           style="width: 240px"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="参数键名" prop="configKey">
@@ -16,7 +16,7 @@
           placeholder="请输入参数键名"
           clearable
           style="width: 240px"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="系统内置" prop="configType">
@@ -182,7 +182,7 @@
 </template>
 
 <script>
-import { listConfig, getConfig, delConfig, addConfig, updateConfig, refreshCache } from "@/api/system/config";
+import { addConfig, delConfig, getConfig, listConfig, refreshCache, updateConfig } from "@/api/system/config";
 
 export default {
   name: "Config",

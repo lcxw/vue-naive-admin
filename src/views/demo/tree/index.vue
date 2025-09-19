@@ -7,7 +7,7 @@
           placeholder="请输入树节点名"
           clearable
           size="small"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="创建时间">
@@ -121,7 +121,7 @@
 </template>
 
 <script>
-import { listTree, getTree, delTree, addTree, updateTree } from "@/api/demo/tree";
+import { addTree, delTree, getTree, listTree, updateTree } from "@/api/demo/tree";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 

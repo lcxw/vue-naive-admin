@@ -7,7 +7,7 @@
           placeholder="请输入系统模块"
           clearable
           style="width: 240px;"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="操作人员" prop="operName">
@@ -16,7 +16,7 @@
           placeholder="请输入操作人员"
           clearable
           style="width: 240px;"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="类型" prop="businessType">
@@ -191,7 +191,7 @@
 </template>
 
 <script>
-import { list, delOperlog, cleanOperlog } from "@/api/monitor/operlog";
+import { cleanOperlog, delOperlog, list } from "@/api/monitor/operlog";
 
 export default {
   name: "Operlog",

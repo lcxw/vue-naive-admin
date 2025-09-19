@@ -21,16 +21,16 @@
 </template>
 
 <script>
-import Vue from 'vue';
+// import Vue from 'vue';
 import '@/plugins/package/theme/index.scss';
 import { BpmnProcessDesigner, BmpnProcessPenal } from '@/plugins/package/index';
 // 自定义元素选中时的弹出菜单（修改 默认任务 为 用户任务）
 import CustomContentPadProvider from '@/plugins/package/designer/plugins/content-pad';
 // 自定义左侧菜单（修改 默认任务 为 用户任务）
 import CustomPaletteProvider from '@/plugins/package/designer/plugins/palette';
-import { vuePlugin } from '@/plugins/package/highlight';
+// import { vuePlugin } from '@/plugins/package/highlight';
 import 'highlight.js/styles/atom-one-dark-reasonable.css';
-Vue.use(vuePlugin);
+// Vue.use(vuePlugin);
 
 export default {
   name: 'ProcessDesigner',

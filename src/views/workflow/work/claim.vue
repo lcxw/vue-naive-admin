@@ -8,7 +8,7 @@
           placeholder="请输入流程名称"
           clearable
           size="small"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="接收时间">
@@ -84,8 +84,8 @@
 </template>
 
 <script>
-import { listClaimProcess } from '@/api/workflow/process';
-import { claimTask } from '@/api/workflow/task';
+import { listClaimProcess } from "@/api/workflow/process";
+import { claimTask } from "@/api/workflow/task";
 
 export default {
   name: 'Claim',

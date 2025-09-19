@@ -49,6 +49,9 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(process.cwd(), 'src'),
         '~': path.resolve(process.cwd()),
       },
+      // 设置扩展名优先级，默认是['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json']
+      // 这里将.vue放在最前面，这样在导入模块时，如果遇到同名文件，会优先选择.vue文件
+      extensions: ['.vue', '.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
     },
     server: {
       host: '0.0.0.0',
@@ -78,6 +81,25 @@ export default defineConfig(({ mode }) => {
           target: 'http://oidcs.cated.local:20007',
           changeOrigin: true,
           rewrite: path => path.replace(/^\/api\/flowable-server/, ''),
+          secure: false,
+          ws: true, // 如果需要 websocket 支持
+          // 以下配置确保 cookie 被传递
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Credentials': 'true',
+          },
+          configure: (proxy, options) => {
+            // 配置此项可在响应头中看到请求的真实地址
+            proxy.on('proxyRes', (proxyRes, req) => {
+              proxyRes.headers['x-real-url']
+                = new URL(req.url || '', options.target)?.href || ''
+            })
+          },
+        },
+        '/api/workflow': {
+          target: 'http://oidcs.cated.local:20007',
+          changeOrigin: true,
+          rewrite: path => path.replace(/^\/api\/workflow/, 'workflow'),
           secure: false,
           ws: true, // 如果需要 websocket 支持
           // 以下配置确保 cookie 被传递

@@ -7,7 +7,7 @@
           placeholder="请输入流程标识"
           clearable
           size="small"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="流程名称" prop="processName">
@@ -16,7 +16,7 @@
           placeholder="请输入流程名称"
           clearable
           size="small"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="流程分类" prop="category">
@@ -177,9 +177,9 @@
 </template>
 
 <script>
-import { listAllCategory } from '@/api/workflow/category'
-import { listDeploy, listPublish, getBpmnXml, changeState, delDeploy } from '@/api/workflow/deploy'
-import ProcessViewer from '@/components/ProcessViewer'
+import { listAllCategory } from "@/api/workflow/category";
+import { changeState, delDeploy, getBpmnXml, listDeploy, listPublish } from "@/api/workflow/deploy";
+import ProcessViewer from "@/components/ProcessViewer";
 
 export default {
   name: 'Deploy',

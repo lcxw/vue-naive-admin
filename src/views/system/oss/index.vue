@@ -7,7 +7,7 @@
           placeholder="请输入文件名"
           clearable
           size="small"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="原名" prop="originalName">
@@ -16,7 +16,7 @@
           placeholder="请输入原名"
           clearable
           size="small"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="文件后缀" prop="fileSuffix">
@@ -25,7 +25,7 @@
           placeholder="请输入文件后缀"
           clearable
           size="small"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="创建时间">
@@ -47,7 +47,7 @@
           placeholder="请输入上传人"
           clearable
           size="small"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="服务商" prop="service">
@@ -56,7 +56,7 @@
           placeholder="请输入服务商"
           clearable
           size="small"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item>
@@ -193,7 +193,7 @@
 </template>
 
 <script>
-import { listOss, delOss } from "@/api/system/oss";
+import { delOss, listOss } from "@/api/system/oss";
 
 export default {
   name: "Oss",

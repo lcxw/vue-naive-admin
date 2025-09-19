@@ -7,7 +7,7 @@
           v-model="queryParams.userName"
           placeholder="请输入用户名称"
           clearable
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="手机号码" prop="phonenumber">
@@ -15,7 +15,7 @@
           v-model="queryParams.phonenumber"
           placeholder="请输入手机号码"
           clearable
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item>
@@ -57,7 +57,8 @@
 </template>
 
 <script>
-import { unallocatedUserList, authUserSelectAll } from "@/api/system/role";
+import { authUserSelectAll, unallocatedUserList } from "@/api/system/role";
+
 export default {
   dicts: ['sys_normal_disable'],
   props: {

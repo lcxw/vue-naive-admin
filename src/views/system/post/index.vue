@@ -6,7 +6,7 @@
           v-model="queryParams.postCode"
           placeholder="请输入岗位编码"
           clearable
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="岗位名称" prop="postName">
@@ -14,7 +14,7 @@
           v-model="queryParams.postName"
           placeholder="请输入岗位名称"
           clearable
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="状态" prop="status">
@@ -157,7 +157,7 @@
 </template>
 
 <script>
-import { listPost, getPost, delPost, addPost, updatePost } from "@/api/system/post";
+import { addPost, delPost, getPost, listPost, updatePost } from "@/api/system/post";
 
 export default {
   name: "Post",

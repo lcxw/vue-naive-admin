@@ -7,7 +7,7 @@
           placeholder="请输入登录地址"
           clearable
           style="width: 240px;"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="用户名称" prop="userName">
@@ -16,7 +16,7 @@
           placeholder="请输入用户名称"
           clearable
           style="width: 240px;"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="状态" prop="status">
@@ -130,7 +130,7 @@
 </template>
 
 <script>
-import { list, delLogininfor, cleanLogininfor, unlockLogininfor } from "@/api/monitor/logininfor";
+import { cleanLogininfor, delLogininfor, list, unlockLogininfor } from "@/api/monitor/logininfor";
 
 export default {
   name: "Logininfor",

@@ -7,7 +7,7 @@
           placeholder="请输入流程标识"
           clearable
           size="small"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="流程名称" prop="processName">
@@ -16,7 +16,7 @@
           placeholder="请输入流程名称"
           clearable
           size="small"
-          @keyup.enter.native="handleQuery"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="流程分类" prop="category">
@@ -136,8 +136,9 @@
 </template>
 
 <script>
-import { listOwnProcess, stopProcess, delProcess } from '@/api/workflow/process';
-import { listAllCategory } from '@/api/workflow/category';
+import { delProcess, listOwnProcess, stopProcess } from "@/api/workflow/process";
+import { listAllCategory } from "@/api/workflow/category";
+
 export default {
   name: "Own",
   dicts: ['wf_process_status'],
