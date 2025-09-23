@@ -33,7 +33,7 @@
           :disabled="modalAction === 'view'"
         >
           <n-form-item
-            v-if="['add'].includes(modalAction)"
+            v-if="['add', 'edit'].includes(modalAction)"
             label="模型名称"
             path="formName"
             :rule="{
@@ -45,7 +45,7 @@
             <n-input v-model:value="modalForm.formName" />
           </n-form-item>
           <n-form-item
-            v-if="['add'].includes(modalAction)"
+            v-if="['add', 'edit'].includes(modalAction)"
             label="备注"
             path="remark"
             :rule="{
@@ -59,12 +59,11 @@
         </n-form>
       </MeModal>
       <!-- 预览表单对话框 -->
-
-      <n-modal v-model:show="renderFormOpen" title="表单详情" width="60%" append-to-body>
-        <v-form-render ref="vFormRef" :form-json="previewFormJson" :form-data="formData" :option-data="optionData" />
-      </n-modal>
+      <MeModal  v-model:show="renderFormOpen" title="表单详情"   append-to-body>
+        <v-form-render ref="vfDesigner" :form-json="previewFormJson" :form-data="formData" :option-data="optionData" />
+      </MeModal>
       <!-- 设计表单对话框 -->
-      <n-modal v-model:show="designerFormOpen" custom-class="vf-designer" append-to-body>
+      <MeModal v-model:show="designerFormOpen" custom-class="vf-designer" append-to-body>
         <v-form-designer
           ref="vfDesigner" :reset-form-json="true"
           :designer-config="{ externalLink: false, toolbarMaxWidth: 480 }"
@@ -74,12 +73,9 @@
             <el-button type="primary" @click="saveFormDesign">
               <i class="el-icon-finished" />保存
             </el-button>
-            <el-button @click="designerFormOpen = false">
-              关闭
-            </el-button>
           </template>
         </v-form-designer>
-      </n-modal>
+      </MeModal>
     </MeCrud>
   </CommonPage>
 </template>
@@ -117,6 +113,7 @@ const vfDesigner = ref(null)
 const formData = ref(null)
 const optionData = ref(null)
 const vFormRef = ref(null)
+const previewModal = ref(null)
 const renderFormOpen = ref(false)
 const designerFormOpen = ref(false)
 const previewFormJson = ref({ formConfig: {}, widgetList: [] }) // 新增响应式数据
@@ -232,5 +229,12 @@ function openPreview(row) {
   previewFormJson.value = row.content || { formConfig: {}, widgetList: [] }
   // 打开对话框
   renderFormOpen.value = true
+  nextTick(() => {
+    if (vfDesigner.value) {
+      // 可以根据需要初始化设计器
+      // 例如：vfDesigner.value.setFormJson(initFormJson)
+      vfDesigner.value.setFormJson(row.content || { formConfig: {}, widgetList: [] })
+    }
+  })
 }
 </script>

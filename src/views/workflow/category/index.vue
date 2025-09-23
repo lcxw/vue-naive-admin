@@ -63,17 +63,17 @@
 </template>
 
 <script setup>
-import { NButton } from 'naive-ui'
+import { NButton, NCheckbox } from 'naive-ui'
 import { addCategory, delCategory, listCategory, updateCategory } from '@/api/workflow/category.js'
 import { MeCrud, MeModal, MeQueryItem } from '@/components'
 import { useCrud } from '@/composables'
-import { withPermission } from '@/directives/index.js'
 
 defineOptions({ name: 'UserMgt' })
 
 const $table = ref(null)
 /** QueryBar筛选参数（可选） */
 const queryItems = ref({})
+const selectItems = ref([])
 
 // 遮罩层
 
@@ -117,6 +117,22 @@ const columns = [
     type: 'selection',
     width: 55,
     fixed: 'left',
+    onCheck: row => selectItems.value?.push(row.categoryId),
+    render(row) {
+      return h(
+        NCheckbox,
+        {
+          size: 'small',
+          type: 'primary',
+          style: 'margin-left: 12px;',
+          onClick: row => selectItems.value?.push(row.categoryId),
+        },
+        {
+          default: () => '修改',
+          icon: () => h('i', { class: 'i-radix-icons:reset text-14' }),
+        },
+      )
+    },
   },
   {
     title: '分类编号',
@@ -147,17 +163,6 @@ const columns = [
     hideInExcel: true,
     render(row) {
       return [
-        withPermission(
-          h(NButton, {
-            size: 'small',
-            type: 'primary',
-            secondary: true,
-          }, {
-            default: () => '超管专属',
-            icon: () => h('i', { class: 'i-carbon:user-role text-14' }),
-          }),
-          'SuperAdmin',
-        ),
         h(
           NButton,
           {

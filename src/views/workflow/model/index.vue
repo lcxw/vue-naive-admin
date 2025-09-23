@@ -47,7 +47,6 @@
         :model="modalForm"
         :rules="rules"
         label-width="80px"
-        :disabled="modalAction !== 'add'"
       >
         <n-form-item label="模型标识" prop="modelKey">
           <n-input v-model:value="modalForm.modelKey" clearable />
@@ -77,16 +76,6 @@
           />
         </n-form-item>
       </n-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <NButton type="primary" @click="submitForm">
-            确 定
-          </NButton>
-          <NButton @click="cancel()">
-            取 消
-          </NButton>
-        </div>
-      </template>
     </MeModal>
     <!-- 流程图 -->
     <MeModal
@@ -132,27 +121,15 @@
       v-model:show="designerOpen"
       :title="designerData.title"
       preset="fullscreen"
-      :closable="false"
+      :closable="true"
     >
-      <div v-if="!designerData.loading">
         <ProcessDesigner
-          :key="designerOpen"
           ref="modelDesigner"
           style="border: 1px solid rgba(0, 0, 0, 0.1)"
           :bpmn-xml="designerData.bpmnXml"
           :designer-form="designerData.form"
           @save="onSaveDesigner"
         />
-      </div>
-      <n-spin
-        v-else
-        style="
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-        "
-      />
     </MeModal>
   </CommonPage>
 </template>
@@ -160,12 +137,8 @@
 <script setup>
 import { NButton, NCollapse, NCollapseItem, NTag } from 'naive-ui'
 import {
-  addCategory,
-  delCategory,
-  updateCategory,
-} from '@/api/workflow/category.js'
-import {
   addModel,
+  delModel,
   deployModel,
   getBpmnXml,
   historyModel,
@@ -174,6 +147,7 @@ import {
   updateModel,
 } from '@/api/workflow/model'
 import { MeCrud, MeModal, MeQueryItem } from '@/components/index.js'
+import ProcessDesigner from "@/components/ProcessDesigner/index.vue";
 import { useCrud } from '@/composables/index.js'
 
 const $table = ref(null)
@@ -198,9 +172,9 @@ const {
 } = useCrud({
   name: '分类',
   initForm: { enable: true },
-  doCreate: addCategory,
-  doDelete: delCategory,
-  doUpdate: updateCategory,
+  doCreate: addModel,
+  doDelete: delModel,
+  doUpdate: updateModel,
   refresh: () => $table.value?.handleSearch(),
 })
 const loading = ref(false)
@@ -212,6 +186,7 @@ const single = ref(true)
 const multiple = ref(true)
 // 显示搜索条件
 const showSearch = ref(true)
+const modelDesigner = ref(null)
 // 总条数
 const total = ref(0)
 // 流程模型表格数据
@@ -260,11 +235,6 @@ const historyList = ref([])
 
 // 表格列配置
 const columns = ref([
-  {
-    type: 'selection',
-    width: 50,
-    align: 'center',
-  },
   {
     title: '模型标识',
     key: 'modelKey',
@@ -378,7 +348,7 @@ const columns = ref([
               {
                 title: '更多',
                 name: '1',
-                arrowPlacement: "left",
+                arrowPlacement: 'left',
               },
               [
                 h(
@@ -434,11 +404,6 @@ const columns = ref([
 
 // 历史表格列配置
 const historyColumns = ref([
-  {
-    type: 'selection',
-    width: 50,
-    align: 'center',
-  },
   {
     title: '模型标识',
     key: 'modelKey',
@@ -622,5 +587,22 @@ function handleLatest(row) {
         this.history.loading = false
       })
   })
+}
+/** 设计按钮操作 */
+function handleDesigner(row) {
+  designerData.value.title = `流程设计 - ${row.modelName}`
+  designerData.value.modelId = row.modelId
+  designerData.value.form = {
+    processName: row.modelName,
+    processKey: row.modelKey,
+  }
+  if (row.modelId) {
+    designerData.value.loading = true
+    getBpmnXml(row.modelId).then((response) => {
+      designerData.value.bpmnXml = response.data || ''
+      designerData.value.loading = false
+      designerOpen.value = true
+    })
+  }
 }
 </script>
