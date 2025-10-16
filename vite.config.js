@@ -44,6 +44,17 @@ export default defineConfig(({ mode }) => {
       // 移除非必要的vue-router动态路由警告: No match found for location with path
       removeNoMatch(),
     ],
+    esbuild: {
+      loader: 'jsx',
+      include: /\.(jsx|tsx|js|ts)$/,
+    },
+    optimizeDeps: {
+      esbuildOptions: {
+        loader: {
+          '.js': 'jsx',
+        },
+      },
+    },
     resolve: {
       alias: {
         '@': path.resolve(process.cwd(), 'src'),
